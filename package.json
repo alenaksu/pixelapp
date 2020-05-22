@@ -1,0 +1,22 @@
+{
+  "name": "pisellator",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "test": "echo \"This template does not include a test runner by default.\" && exit 1",
+    "format": "prettier --write 'src/**/*.js'",
+    "lint": "prettier --check 'src/**/*.js'"
+  },
+  "devDependencies": {
+    "@snowpack/plugin-babel": "^0.7.0",
+    "@types/dat.gui": "^0.7.5",
+    "@types/mathjs": "^6.0.5",
+    "prettier": "^2.0.0",
+    "snowpack": "^2.0.0-0",
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "dat.gui": "^0.7.7",
+    "mathjs": "^7.0.0"
+  }
+}

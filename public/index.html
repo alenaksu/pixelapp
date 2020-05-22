@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Snowpack App</title>
+        <meta charset="utf-8" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Web site created using create-snowpack-app" />
+        <link
+            rel="stylesheet"
+            href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
+        />
+        <link
+            rel="stylesheet"
+            href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"
+        />
+        <link
+            rel="stylesheet"
+            href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css"
+        />
+        <link rel="stylesheet" type="text/css" href="/index.css" />
+    </head>
+    <body>
+        <div id="main" class="column">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="sidebar" class="column toolbar">
+            <div>
+                <input
+                    class="file-input"
+                    type="file"
+                    id="fileInput"
+                    accept="image/png, image/jpeg"
+                />
+            </div>
+            <div>
+                <img id="image" src="" />
+            </div>
+            <div id="controls"></div>
+            <div class="row"><div id="palette" class="column"></div></div>
+        </div>
+
+        <script type="module" src="/_dist_/index.js"></script>
+        <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    --></body>
+</html>
