@@ -1,0 +1,18 @@
+{
+    "include": ["src/**/*", "global.d.ts"],
+    "exclude": ["node_modules"],
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "baseUrl": "./",
+        "lib": ["es2017", "dom", "dom.iterable", "ES2020", "ESNext.Array"],
+        "module": "ESNext",
+        "target": "ES2017",
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "strict": false,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": false,
+        "noEmit": true
+    }
+}
