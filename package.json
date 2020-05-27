@@ -12,7 +12,7 @@
     "@types/dat.gui": "^0.7.5",
     "@types/mathjs": "^6.0.5",
     "prettier": "^2.0.0",
-    "snowpack": "^2.0.0-0",
+    "snowpack": "^2.0.0",
     "typescript": "^3.9.3"
   },
   "dependencies": {
