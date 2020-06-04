@@ -50,15 +50,15 @@ export function splitBucket(bucket: Bucket, imageData: ImageData, depth = 0) {
     const channel = r === max ? 0 : g === max ? 1 : 2;
 
     const mean = bucket.reduce((sum, rgb) => sum + rgb[channel], 0) / bucket.length;
-    // bucket.sort((a, b) => a[channel] - b[channel]);
+    bucket.sort((a, b) => a[channel] - b[channel]);
 
-    // const median = Math.ceil(bucket.length / 2);
+    const median = Math.ceil(bucket.length / 2);
 
     return [
-        // ...splitBucket(bucket.slice(0, median), imageData, depth - 1),
-        // ...splitBucket(bucket.slice(median), imageData, depth - 1),
-        ...splitBucket(bucket.filter(rgb => rgb[channel] < mean), imageData, depth - 1),
-        ...splitBucket(bucket.filter(rgb => rgb[channel] >= mean), imageData, depth - 1),
+         ...splitBucket(bucket.slice(0, median), imageData, depth - 1),
+         ...splitBucket(bucket.slice(median), imageData, depth - 1),
+        //...splitBucket(bucket.filter(rgb => rgb[channel] < mean), imageData, depth - 1),
+        //...splitBucket(bucket.filter(rgb => rgb[channel] >= mean), imageData, depth - 1),
     ];
 }
 

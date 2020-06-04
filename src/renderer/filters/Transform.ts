@@ -1,36 +1,36 @@
 import Filter from '../Filter';
 
-export default class Blur extends Filter {
-    size: number = 1;
+export default class Transform extends Filter {
+    blur: number = 1;
+    saturation: number = 1;
+    warmth: number = 0;
+    sharpen: number = 0;
+    brightness: number = 1;
+    contrast: number = 1;
+    grey: number = 0.5;
+
     static get fragmentShader() {
         return `
-            precision mediump float;
+            precision highp float;
+
             varying vec2 texCoords;
+            
             uniform sampler2D image;
             uniform vec2 resolution;
-            uniform float size;
-        
-            // vec4 convolute(mat3 kernel, sampler2D image, vec2 pos) {
-            //     vec4 color = vec4(0);
-            //     vec2 off = vec2(size) * resolution;
-            //     for (int i = 0; i < 3; i++)
-            //     {
-            //         for (int j = 0; j < 3; j++)
-            //         {
-            //             vec2 samplePos = pos + vec2(i - off.x, j - off.y);
-            //             vec4 sampleColor = texture2D(image, samplePos);
+            uniform float saturation;
+            uniform float warmth;
+            uniform float sharpen;
+            uniform float brightness;
+            uniform float contrast;
+            uniform float blur;
+            uniform float grey;
             
-            //             color += sampleColor * kernel[i][j];
-            //         }
-            //     }
+            vec3 saturationVector = vec3(0.299, 0.587, 0.114);
             
-            //     return color;
-            // }
-
             void main() {
-                vec2 off = size * resolution;
+                vec2 off = resolution * blur;
                 vec2 off2 = off * 2.0;
-
+                
                 // Why isn't this a loop? Some graphics chips can get be very slow if they
                 // can't tell at compile time which texture reads are needed
                 vec4 tex00 = texture2D(image, texCoords + vec2(-off2.x, -off2.y));
@@ -38,53 +38,68 @@ export default class Blur extends Filter {
                 vec4 tex20 = texture2D(image, texCoords + vec2(0.0, -off2.y));
                 vec4 tex30 = texture2D(image, texCoords + vec2(off.x, -off2.y));
                 vec4 tex40 = texture2D(image, texCoords + vec2(off2.x, -off2.y));
-
+                
                 vec4 tex01 = texture2D(image, texCoords + vec2(-off2.x, -off.y));
                 vec4 tex11 = texture2D(image, texCoords + vec2(-off.x, -off.y));
                 vec4 tex21 = texture2D(image, texCoords + vec2(0.0, -off.y));
                 vec4 tex31 = texture2D(image, texCoords + vec2(off.x, -off.y));
                 vec4 tex41 = texture2D(image, texCoords + vec2(off2.x, -off.y));
-
+                
                 vec4 tex02 = texture2D(image, texCoords + vec2(-off2.x, 0.0));
                 vec4 tex12 = texture2D(image, texCoords + vec2(-off.x, 0.0));
                 vec4 tex22 = texture2D(image, texCoords + vec2(0.0, 0.0));
                 vec4 tex32 = texture2D(image, texCoords + vec2(off.x, 0.0));
                 vec4 tex42 = texture2D(image, texCoords + vec2(off2.x, 0.0));
-
+                
                 vec4 tex03 = texture2D(image, texCoords + vec2(-off2.x, off.y));
                 vec4 tex13 = texture2D(image, texCoords + vec2(-off.x, off.y));
                 vec4 tex23 = texture2D(image, texCoords + vec2(0.0, off.y));
                 vec4 tex33 = texture2D(image, texCoords + vec2(off.x, off.y));
                 vec4 tex43 = texture2D(image, texCoords + vec2(off2.x, off.y));
-
+                
                 vec4 tex04 = texture2D(image, texCoords + vec2(-off2.x, off2.y));
                 vec4 tex14 = texture2D(image, texCoords + vec2(-off.x, off2.y));
                 vec4 tex24 = texture2D(image, texCoords + vec2(0.0, off2.y));
                 vec4 tex34 = texture2D(image, texCoords + vec2(off.x, off2.y));
                 vec4 tex44 = texture2D(image, texCoords + vec2(off2.x, off2.y));
-
+                
                 vec4 tex = tex22;
-
+                
                 // Blur
                 vec4 blurred = 1.0 * tex00 + 4.0 * tex10 + 6.0 * tex20 + 4.0 * tex30 + 1.0 * tex40
                             + 4.0 * tex01 + 16.0 * tex11 + 24.0 * tex21 + 16.0 * tex31 + 4.0 * tex41
                             + 6.0 * tex02 + 24.0 * tex12 + 36.0 * tex22 + 24.0 * tex32 + 6.0 * tex42
                             + 4.0 * tex03 + 16.0 * tex13 + 24.0 * tex23 + 16.0 * tex33 + 4.0 * tex43
                             + 1.0 * tex04 + 4.0 * tex14 + 6.0 * tex24 + 4.0 * tex34 + 1.0 * tex44;
-
                 blurred /= 256.0;
-                    
-                // vec4 color = convolute(kernel, image, texCoords) * (1.0 / 16.0);
-        
-                gl_FragColor = blurred;
-                gl_FragColor.a = 1.0;
+                
+                tex += (tex - blurred) * sharpen;
+                
+                vec3 desaturated = vec3(dot(saturationVector, tex.rgb));
+                vec3 mixed = mix(desaturated, tex.rgb, saturation);
+                vec4 color = vec4(mixed, tex.a);
+                
+                color.r += warmth;
+                color.b -= warmth;
+                
+                vec3 greyVec = vec3(grey, grey, grey);
+                
+                color.rgb = mix(color.rgb * brightness, mix(greyVec, color.rgb, contrast), 0.5);
+                
+                gl_FragColor = color;
             }
         `;
     }
 
     get uniforms() {
         return {
-            size: this.size,
+            saturation: this.saturation,
+            warmth: this.warmth,
+            sharpen: this.sharpen,
+            brightness: this.brightness,
+            contrast: this.contrast,
+            blur: this.blur,
+            grey: this.grey,
         };
     }
 }

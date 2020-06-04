@@ -1,8 +1,11 @@
 import { createTexture, createFramebuffer } from './utils';
 import Filter from './Filter';
-import Blur from './filters/Blur';
+import Transform from './filters/Transform';
 import FlipY from './filters/FlipY';
 import Sobel from './filters/Sobel/index';
+import Quantize from './filters/Pixelate';
+import Pixelate from './filters/Pixelate';
+import Posterize from './filters/Posterize';
 
 interface Renderer {
     setSource(image: HTMLImageElement);
@@ -29,8 +32,10 @@ class Renderer {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(planeCoords), gl.STATIC_DRAW);
 
         this.registerFilter(Filter);
-        this.registerFilter(Blur);
+        this.registerFilter(Posterize);
+        this.registerFilter(Transform);
         this.registerFilter(Sobel);
+        this.registerFilter(Pixelate);
         this.registerFilter(FlipY);
     }
 

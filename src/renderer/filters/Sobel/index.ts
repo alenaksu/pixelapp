@@ -3,6 +3,7 @@ import Filter from '../../Filter';
 export default class Sobel extends Filter {
     size: number = 1;
     threshold: number = 0.7;
+    multiplier: number = 0.6;
 
     static get fragmentShader() {
         return `
@@ -12,6 +13,7 @@ export default class Sobel extends Filter {
             uniform vec2 resolution;
             uniform float size;
             uniform float threshold;
+            uniform float multiplier;
         
             float convolute(mat3 kernel, sampler2D image, vec2 pos)
             {
@@ -50,7 +52,7 @@ export default class Sobel extends Filter {
             void main() {
                 float magnitude = sobel(image, texCoords);
         
-                gl_FragColor = texture2D(image, texCoords) * (magnitude > threshold ? 0.1 : 1.0);
+                gl_FragColor = texture2D(image, texCoords) * (magnitude > threshold ? multiplier : 1.0);
                 gl_FragColor.a = 1.0;
             }
         `;
@@ -60,6 +62,7 @@ export default class Sobel extends Filter {
         return {
             size: this.size,
             threshold: this.threshold,
+            multiplier: this.multiplier
         };
     }
 }
