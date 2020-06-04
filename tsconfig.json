@@ -20,6 +20,7 @@
         "strict": false,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        "typeRoots": ["./types.d.ts"]
     }
 }

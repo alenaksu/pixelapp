@@ -1,0 +1,90 @@
+import Filter from '../Filter';
+
+export default class Blur extends Filter {
+    size: number = 1;
+    static get fragmentShader() {
+        return `
+            precision mediump float;
+            varying vec2 texCoords;
+            uniform sampler2D image;
+            uniform vec2 resolution;
+            uniform float size;
+        
+            // vec4 convolute(mat3 kernel, sampler2D image, vec2 pos) {
+            //     vec4 color = vec4(0);
+            //     vec2 off = vec2(size) * resolution;
+            //     for (int i = 0; i < 3; i++)
+            //     {
+            //         for (int j = 0; j < 3; j++)
+            //         {
+            //             vec2 samplePos = pos + vec2(i - off.x, j - off.y);
+            //             vec4 sampleColor = texture2D(image, samplePos);
+            
+            //             color += sampleColor * kernel[i][j];
+            //         }
+            //     }
+            
+            //     return color;
+            // }
+
+            void main() {
+                vec2 off = size * resolution;
+                vec2 off2 = off * 2.0;
+
+                // Why isn't this a loop? Some graphics chips can get be very slow if they
+                // can't tell at compile time which texture reads are needed
+                vec4 tex00 = texture2D(image, texCoords + vec2(-off2.x, -off2.y));
+                vec4 tex10 = texture2D(image, texCoords + vec2(-off.x, -off2.y));
+                vec4 tex20 = texture2D(image, texCoords + vec2(0.0, -off2.y));
+                vec4 tex30 = texture2D(image, texCoords + vec2(off.x, -off2.y));
+                vec4 tex40 = texture2D(image, texCoords + vec2(off2.x, -off2.y));
+
+                vec4 tex01 = texture2D(image, texCoords + vec2(-off2.x, -off.y));
+                vec4 tex11 = texture2D(image, texCoords + vec2(-off.x, -off.y));
+                vec4 tex21 = texture2D(image, texCoords + vec2(0.0, -off.y));
+                vec4 tex31 = texture2D(image, texCoords + vec2(off.x, -off.y));
+                vec4 tex41 = texture2D(image, texCoords + vec2(off2.x, -off.y));
+
+                vec4 tex02 = texture2D(image, texCoords + vec2(-off2.x, 0.0));
+                vec4 tex12 = texture2D(image, texCoords + vec2(-off.x, 0.0));
+                vec4 tex22 = texture2D(image, texCoords + vec2(0.0, 0.0));
+                vec4 tex32 = texture2D(image, texCoords + vec2(off.x, 0.0));
+                vec4 tex42 = texture2D(image, texCoords + vec2(off2.x, 0.0));
+
+                vec4 tex03 = texture2D(image, texCoords + vec2(-off2.x, off.y));
+                vec4 tex13 = texture2D(image, texCoords + vec2(-off.x, off.y));
+                vec4 tex23 = texture2D(image, texCoords + vec2(0.0, off.y));
+                vec4 tex33 = texture2D(image, texCoords + vec2(off.x, off.y));
+                vec4 tex43 = texture2D(image, texCoords + vec2(off2.x, off.y));
+
+                vec4 tex04 = texture2D(image, texCoords + vec2(-off2.x, off2.y));
+                vec4 tex14 = texture2D(image, texCoords + vec2(-off.x, off2.y));
+                vec4 tex24 = texture2D(image, texCoords + vec2(0.0, off2.y));
+                vec4 tex34 = texture2D(image, texCoords + vec2(off.x, off2.y));
+                vec4 tex44 = texture2D(image, texCoords + vec2(off2.x, off2.y));
+
+                vec4 tex = tex22;
+
+                // Blur
+                vec4 blurred = 1.0 * tex00 + 4.0 * tex10 + 6.0 * tex20 + 4.0 * tex30 + 1.0 * tex40
+                            + 4.0 * tex01 + 16.0 * tex11 + 24.0 * tex21 + 16.0 * tex31 + 4.0 * tex41
+                            + 6.0 * tex02 + 24.0 * tex12 + 36.0 * tex22 + 24.0 * tex32 + 6.0 * tex42
+                            + 4.0 * tex03 + 16.0 * tex13 + 24.0 * tex23 + 16.0 * tex33 + 4.0 * tex43
+                            + 1.0 * tex04 + 4.0 * tex14 + 6.0 * tex24 + 4.0 * tex34 + 1.0 * tex44;
+
+                blurred /= 256.0;
+                    
+                // vec4 color = convolute(kernel, image, texCoords) * (1.0 / 16.0);
+        
+                gl_FragColor = blurred;
+                gl_FragColor.a = 1.0;
+            }
+        `;
+    }
+
+    get uniforms() {
+        return {
+            size: this.size,
+        };
+    }
+}
