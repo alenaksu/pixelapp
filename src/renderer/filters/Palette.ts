@@ -37,7 +37,7 @@ export default class Palette extends Filter {
             float luma(vec4 color) {
                 return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.722;
             }
-
+            
             float colorDistance(vec4 c0, vec4 c1) {
                 float rMean = (c0.r + c1.r) / 2.0;
                 float r = pow(c0.r - c1.r, 2.0);
@@ -45,13 +45,6 @@ export default class Palette extends Filter {
                 float b = pow(c0.b - c1.b, 2.0);
 
                 return sqrt((2.0 + rMean) * r + 4.0 * g + (2.0 + 1.0 - rMean) * b);
-
-                // return sqrt(
-                //     pow((c0.r - c1.r), 2.0) +
-                //     pow((c0.g - c1.g), 2.0) +
-                //     pow((c0.b - c1.b), 2.0) +
-                //     pow((c0.a - c1.a), 2.0)
-                // );
             }
 
             float indexValue() {
@@ -69,7 +62,7 @@ export default class Palette extends Filter {
                 vec4 closestColor = vec4(0.0, 0, 0, 1.0);
 
                 int s = int(paletteSize);
-                float best = 10.0;
+                float best = 100000.0;
                 for(int i = 0; i < 128; i++) {
                     if (i < s) {
                         vec4 paletteColor = texture2D(palette, vec2(float(i) / paletteSize, 0.5));

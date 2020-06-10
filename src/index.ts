@@ -84,13 +84,15 @@ function loadImage(file: File) {
 
     image = new Image();
     image.onload = () => {
+        // const canvas = document.createElement('canvas');
+        // const context = canvas.getContext()
         const ratio = Math.min(
             transform.maxSize / (image.width > image.height ? image.width : image.height),
             1,
         );
 
-        image.width * ratio;
-        image.height * ratio;
+        image.width *= ratio;
+        image.height *= ratio;
 
         renderer.setSource(image);
     };
@@ -133,6 +135,7 @@ paletteFile.addEventListener('change', (event) => {
 
         const palette = ctx.getImageData(0, 0, c.width, c.height);
 
+        renderer.Palette.parameters.ditherThreshold = 1 / palette.width;
         //palette.data.set(palette);
         renderPalette(palette);
 
