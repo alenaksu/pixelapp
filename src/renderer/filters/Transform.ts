@@ -1,13 +1,16 @@
 import Filter from '../Filter';
 
 export default class Transform extends Filter {
-    blur: number = 1;
-    saturation: number = 1;
-    warmth: number = 0;
-    sharpen: number = 0;
-    brightness: number = 1;
-    contrast: number = 1;
-    grey: number = 0.5;
+    parameters = {
+        blur: 1,
+        saturation: 1,
+        warmth: 0,
+        sharpen: 0,
+        brightness: 1,
+        contrast: 1,
+        grey: 0.5,
+        gamma: 1.0
+    };
 
     static get fragmentShader() {
         return `
@@ -24,6 +27,7 @@ export default class Transform extends Filter {
             uniform float contrast;
             uniform float blur;
             uniform float grey;
+            uniform float gamma;
             
             vec3 saturationVector = vec3(0.299, 0.587, 0.114);
             
@@ -85,21 +89,11 @@ export default class Transform extends Filter {
                 vec3 greyVec = vec3(grey, grey, grey);
                 
                 color.rgb = mix(color.rgb * brightness, mix(greyVec, color.rgb, contrast), 0.5);
+
+                // color.rgb = pow(color.rgb, vec3(1.0 / gamma));
                 
                 gl_FragColor = color;
             }
         `;
-    }
-
-    get uniforms() {
-        return {
-            saturation: this.saturation,
-            warmth: this.warmth,
-            sharpen: this.sharpen,
-            brightness: this.brightness,
-            contrast: this.contrast,
-            blur: this.blur,
-            grey: this.grey,
-        };
     }
 }

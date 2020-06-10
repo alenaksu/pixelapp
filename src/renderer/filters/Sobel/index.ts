@@ -1,15 +1,18 @@
 import Filter from '../../Filter';
 
 export default class Sobel extends Filter {
-    size: number = 1;
-    threshold: number = 0.7;
-    multiplier: number = 0.6;
+    parameters = {
+        size: 1,
+        threshold: 0.7,
+        multiplier: 1.0,
+    };
 
     static get fragmentShader() {
         return `
             precision mediump float;
             varying vec2 texCoords;
             uniform sampler2D image;
+            uniform sampler2D source;
             uniform vec2 resolution;
             uniform float size;
             uniform float threshold;
@@ -50,19 +53,11 @@ export default class Sobel extends Filter {
             }
             
             void main() {
-                float magnitude = sobel(image, texCoords);
+                float magnitude = sobel(source, texCoords);
         
                 gl_FragColor = texture2D(image, texCoords) * (magnitude > threshold ? multiplier : 1.0);
                 gl_FragColor.a = 1.0;
             }
         `;
-    }
-
-    get uniforms() {
-        return {
-            size: this.size,
-            threshold: this.threshold,
-            multiplier: this.multiplier
-        };
     }
 }

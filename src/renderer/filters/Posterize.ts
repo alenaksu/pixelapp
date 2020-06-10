@@ -1,7 +1,9 @@
 import Filter from '../Filter';
 
 export default class Posterize extends Filter {
-    levels: number = 10;
+    parameters = {
+        levels: 10
+    };
 
     static get fragmentShader() {
         return `
@@ -39,11 +41,5 @@ export default class Posterize extends Filter {
                
             }
         `;
-    }
-
-    get uniforms() {
-        return {
-            levels: this.levels,
-        };
     }
 }

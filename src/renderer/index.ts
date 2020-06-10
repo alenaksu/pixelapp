@@ -6,6 +6,7 @@ import Sobel from './filters/Sobel/index';
 import Quantize from './filters/Pixelate';
 import Pixelate from './filters/Pixelate';
 import Posterize from './filters/Posterize';
+import Palette from './filters/Palette';
 
 interface Renderer {
     setSource(image: HTMLImageElement);
@@ -19,7 +20,7 @@ class Renderer {
     filters: Filter[] = [];
 
     constructor(public canvas: HTMLCanvasElement) {
-        const gl: WebGLRenderingContext = canvas.getContext('webgl');
+        const gl: WebGLRenderingContext = canvas.getContext('webgl2', { antialias: false });
 
         if (!gl) throw new Error('WebGL is not available');
 
@@ -32,7 +33,8 @@ class Renderer {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(planeCoords), gl.STATIC_DRAW);
 
         this.registerFilter(Filter);
-        this.registerFilter(Posterize);
+        // this.registerFilter(Posterize);
+        this.registerFilter(Palette);
         this.registerFilter(Transform);
         this.registerFilter(Sobel);
         this.registerFilter(Pixelate);
@@ -58,11 +60,18 @@ class Renderer {
         // TODO drawImage(gl, image);
         const { gl, source } = this;
 
+        gl.activeTexture(gl.TEXTURE0);
+
         // create a new texture for the source image
         const texture = createTexture(gl, source.width, source.height);
         gl.bindTexture(gl.TEXTURE_2D, texture);
         // draw the original image first
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        gl.activeTexture(gl.TEXTURE0);
     }
 
     draw() {

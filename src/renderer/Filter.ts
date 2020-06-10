@@ -5,6 +5,7 @@ export default class Filter {
     vertexShader: WebGLShader;
     fragmentShader: WebGLShader;
     positionLocation: number;
+    parameters: object = {};
 
     static get vertexShader() {
         return `
@@ -46,12 +47,8 @@ export default class Filter {
         this.program = createProgram(gl, this.vertexShader, this.fragmentShader);
     }
 
-    get uniforms() {
-        return {};
-    }
-
     setupUniforms() {
-        const { gl, program, uniforms } = this;
+        const { gl, program, parameters } = this;
 
         // Turn on the position attribute
         const positionLocation = gl.getAttribLocation(this.program, 'position');
@@ -60,7 +57,7 @@ export default class Filter {
 
         const allUniforms = {
             resolution: [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight],
-            ...uniforms,
+            ...parameters,
         };
 
         for (const name in allUniforms) {
@@ -89,12 +86,13 @@ export default class Filter {
                         gl.uniformMatrix4fv(location, false, new Float32Array(value));
                         break;
                     default:
-                        throw (
-                            'dont\'t know how to load uniform "' +
-                            name +
-                            '" of length ' +
-                            value.length
-                        );
+                        gl.uniform1fv(location, new Float32Array(value));
+                        // throw (
+                        //     'dont\'t know how to load uniform "' +
+                        //     name +
+                        //     '" of length ' +
+                        //     value.length
+                        // );
                 }
             } else if (typeof value === 'number') {
                 gl.uniform1f(location, value);
@@ -107,6 +105,12 @@ export default class Filter {
                 );
             }
         }
+
+        const imageLocation = gl.getUniformLocation(program, 'image');
+        gl.uniform1i(imageLocation, 0);
+
+        const sourceLocation = gl.getUniformLocation(program, 'source');
+        gl.uniform1i(sourceLocation, 1);
     }
 
     use() {

@@ -14,32 +14,27 @@ export function quantize(bucket: Bucket, imageData: ImageData) {
     mg /= bucket.length;
     mb /= bucket.length;
 
-    const color = [mr, mg, mb];
-    for (const [r, g, b, i] of bucket) {
-        imageData.data[i] = mr;
-        imageData.data[i + 1] = mg;
-        imageData.data[i + 2] = mb;
-    }
+    const color = [mr, mg, mb, 255].map(Math.round);
 
     return color;
 }
 
 export function splitBucket(bucket: Bucket, imageData: ImageData, depth = 0) {
-    if (depth === 0) return [quantize(bucket, imageData)];
+    if (depth === 0 || bucket.length === 1) return [quantize(bucket, imageData)];
 
-    const minMax = (range, value) => {
-        range[0] = Math.min(range[0], value);
-        range[1] = Math.max(range[1], value);
-    };
-
-    const rangeR = [Infinity, -Infinity];
-    const rangeG = [Infinity, -Infinity];
-    const rangeB = [Infinity, -Infinity];
+    const rangeR = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    const rangeG = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    const rangeB = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
 
     for (const [r, g, b] of bucket) {
-        minMax(rangeR, r);
-        minMax(rangeG, g);
-        minMax(rangeB, b);
+        rangeR[0] = Math.min(rangeR[0], r);
+        rangeR[1] = Math.max(rangeR[1], r);
+
+        rangeG[0] = Math.min(rangeG[0], g);
+        rangeG[1] = Math.max(rangeG[1], g);
+
+        rangeB[0] = Math.min(rangeB[0], b);
+        rangeB[1] = Math.max(rangeB[1], b);
     }
 
     const r = rangeR[1] - rangeR[0];
@@ -49,20 +44,20 @@ export function splitBucket(bucket: Bucket, imageData: ImageData, depth = 0) {
 
     const channel = r === max ? 0 : g === max ? 1 : 2;
 
-    const mean = bucket.reduce((sum, rgb) => sum + rgb[channel], 0) / bucket.length;
+    //const mean = bucket.reduce((sum, rgb) => sum + rgb[channel], 0) / bucket.length;
     bucket.sort((a, b) => a[channel] - b[channel]);
 
     const median = Math.ceil(bucket.length / 2);
 
     return [
-         ...splitBucket(bucket.slice(0, median), imageData, depth - 1),
-         ...splitBucket(bucket.slice(median), imageData, depth - 1),
-        //...splitBucket(bucket.filter(rgb => rgb[channel] < mean), imageData, depth - 1),
-        //...splitBucket(bucket.filter(rgb => rgb[channel] >= mean), imageData, depth - 1),
+        ...splitBucket(bucket.slice(0, median), imageData, depth - 1),
+        ...splitBucket(bucket.slice(median), imageData, depth - 1),
+        // ...splitBucket(bucket.filter(rgb => rgb[channel] < mean), imageData, depth - 1),
+        // ...splitBucket(bucket.filter(rgb => rgb[channel] >= mean), imageData, depth - 1),
     ];
 }
 
-export default function medianCut(imageData: ImageData, colors: number = 256) {
+export default function medianCut(imageData: ImageData, colors: number = 256): Array<number> {
     const bucket: Bucket = [];
     for (let i = 0; i < imageData.data.length; i += 4) {
         const [r, g, b] = imageData.data.slice(i, i + 4);
@@ -70,7 +65,7 @@ export default function medianCut(imageData: ImageData, colors: number = 256) {
         bucket.push([r, g, b, i]);
     }
 
-    const palette = splitBucket(bucket, imageData, Math.ceil(Math.log2(colors)));
+    const palette = splitBucket(bucket, imageData, Math.round(Math.log2(colors)));
 
     return palette;
 }

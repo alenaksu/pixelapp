@@ -26,18 +26,40 @@
         </div>
         <div id="sidebar" class="column toolbar">
             <div>
-                <input
-                    class="file-input"
-                    type="file"
-                    id="fileInput"
-                    accept="image/png, image/jpeg"
-                />
+                <label class="button"
+                    >Open image
+                    <input
+                        class="file-input"
+                        type="file"
+                        id="fileInput"
+                        accept="image/png, image/jpeg"
+                        style="display: none;"
+                    />
+                </label>
             </div>
             <div>
                 <img id="image" src="" />
             </div>
             <div id="controls"></div>
-            <div class="row"><div id="palette" class="column"></div></div>
+            <div>
+                <div class="row">
+                    <h4 class="column">Palette</h4>
+                    <div class="column-60 column">
+                        <label class="button button-small"
+                            >Import
+                            <input
+                                class="file-input"
+                                type="file"
+                                id="paletteInput"
+                                accept="image/png, image/jpeg"
+                                style="display: none;"
+                            />
+                        </label>
+                        <button id="generatePalette" class="button button-small">Generate</button>
+                    </div>
+                </div>
+                <div id="palette"></div>
+            </div>
         </div>
 
         <script type="module" src="/_dist_/index.js"></script>

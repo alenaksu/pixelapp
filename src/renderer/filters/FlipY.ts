@@ -14,10 +14,4 @@ export default class FlipY extends Filter {
             }
         `;
     }
-
-    get uniforms() {
-        return {
-            u_flipY: -1,
-        };
-    }
 }
