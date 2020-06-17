@@ -1,3 +1,4 @@
+import fragment from './fragment.glsl';
 import Filter from '../../Filter';
 
 export default class Sobel extends Filter {
@@ -10,7 +11,7 @@ export default class Sobel extends Filter {
     static get fragmentShader() {
         return `
             precision mediump float;
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             uniform sampler2D image;
             uniform sampler2D source;
             uniform vec2 resolution;
@@ -53,9 +54,9 @@ export default class Sobel extends Filter {
             }
             
             void main() {
-                float magnitude = sobel(source, texCoords);
+                float magnitude = sobel(source, texCoord);
         
-                gl_FragColor = texture2D(image, texCoords) * (magnitude > threshold ? multiplier : 1.0);
+                gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? multiplier : 1.0);
                 gl_FragColor.a = 1.0;
             }
         `;

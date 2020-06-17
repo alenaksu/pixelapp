@@ -3,24 +3,22 @@ import Filter from './Filter';
 import Transform from './filters/Transform';
 import FlipY from './filters/FlipY';
 import Sobel from './filters/Sobel/index';
-import Quantize from './filters/Pixelate';
 import Pixelate from './filters/Pixelate';
-import Posterize from './filters/Posterize';
 import Palette from './filters/Palette';
 
 interface Renderer {
-    setSource(image: HTMLImageElement);
+    setSource(image: ImageData);
     registerFilter(FilterClass: typeof Filter);
 }
 
 class Renderer {
     [name: string]: Filter | any;
-    source?: HTMLImageElement;
+    source?: ImageData;
     gl: WebGLRenderingContext;
     filters: Filter[] = [];
 
     constructor(public canvas: HTMLCanvasElement) {
-        const gl: WebGLRenderingContext = canvas.getContext('webgl2', { antialias: false });
+        const gl: WebGLRenderingContext = canvas.getContext('webgl', { antialias: false });
 
         if (!gl) throw new Error('WebGL is not available');
 
@@ -54,6 +52,10 @@ class Renderer {
         // Clear the canvas
         gl.clearColor(0, 1.0, 0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.disable(gl.BLEND);
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.DITHER);
     }
 
     drawSource() {
@@ -86,7 +88,8 @@ class Renderer {
 
         this.drawSource();
 
-        for (const filter of filters) {
+        const enabledFilters = filters.filter(({ enabled }) => enabled);
+        for (const filter of enabledFilters) {
             // set the framebuffer to render to
             gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[0].buffer);
             // this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -100,8 +103,15 @@ class Renderer {
             // send result to framebuffer texture
             gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
 
+            // Clear filter changes
+            filter.clear();
+
             [frameBuffers[0], frameBuffers[1]] = [frameBuffers[1], frameBuffers[0]];
         }
+
+        // const data = new Uint8ClampedArray(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+        // gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        // console.log(data);
 
         // unbind the framebuffer
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -109,7 +119,7 @@ class Renderer {
         // get last drawed texture
         gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
 
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        // gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
         for (const fb of frameBuffers) {
@@ -118,7 +128,7 @@ class Renderer {
         }
     }
 
-    setSource(newSource: HTMLImageElement) {
+    setSource(newSource: ImageData) {
         this.source = newSource;
 
         this.canvas.width = newSource.width;

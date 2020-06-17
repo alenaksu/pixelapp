@@ -6,14 +6,16 @@ export default class Filter {
     fragmentShader: WebGLShader;
     positionLocation: number;
     parameters: object = {};
+    enabled: boolean = true;
 
     static get vertexShader() {
         return `
+            precision highp float;
             attribute vec2 position;
-            varying vec2 texCoords;
+            varying vec2 texCoord;
         
             void main() {
-                texCoords = (position + 1.0) / 2.0;
+                texCoord = (position + 1.0) / 2.0;
                 gl_Position = vec4(position, 0, 1.0);
             }
         `;
@@ -22,11 +24,11 @@ export default class Filter {
     static get fragmentShader() {
         return `
             precision mediump float;
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             uniform sampler2D image;
 
             void main() {
-                vec4 color = texture2D(image, texCoords);
+                vec4 color = texture2D(image, texCoord);
 
                 gl_FragColor = color;
             }
@@ -66,33 +68,34 @@ export default class Filter {
 
             const value = allUniforms[name];
             if (Array.isArray(value)) {
+                const array = new  Float32Array(value);
                 switch (value.length) {
                     case 1:
-                        gl.uniform1fv(location, new Float32Array(value));
+                        gl.uniform1fv(location, array);
                         break;
                     case 2:
-                        gl.uniform2fv(location, new Float32Array(value));
+                        gl.uniform2fv(location, array);
                         break;
                     case 3:
-                        gl.uniform3fv(location, new Float32Array(value));
+                        gl.uniform3fv(location, array);
                         break;
                     case 4:
-                        gl.uniform4fv(location, new Float32Array(value));
+                        gl.uniform4fv(location, array);
                         break;
                     case 9:
-                        gl.uniformMatrix3fv(location, false, new Float32Array(value));
+                        gl.uniformMatrix3fv(location, false, array);
                         break;
                     case 16:
-                        gl.uniformMatrix4fv(location, false, new Float32Array(value));
+                        gl.uniformMatrix4fv(location, false, array);
                         break;
                     default:
-                        gl.uniform1fv(location, new Float32Array(value));
-                        // throw (
-                        //     'dont\'t know how to load uniform "' +
-                        //     name +
-                        //     '" of length ' +
-                        //     value.length
-                        // );
+                        gl.uniform1fv(location, array);
+                    // throw (
+                    //     'dont\'t know how to load uniform "' +
+                    //     name +
+                    //     '" of length ' +
+                    //     value.length
+                    // );
                 }
             } else if (typeof value === 'number') {
                 gl.uniform1f(location, value);
@@ -120,4 +123,6 @@ export default class Filter {
 
         this.setupUniforms();
     }
+
+    clear() {}
 }

@@ -1,8 +1,11 @@
 precision mediump float;
-varying vec2 texCoords;
+varying vec2 texCoord;
 uniform sampler2D image;
+uniform sampler2D source;
 uniform vec2 resolution;
 uniform float size;
+uniform float threshold;
+uniform float multiplier;
 
 float convolute(mat3 kernel, sampler2D image, vec2 pos)
 {
@@ -38,10 +41,9 @@ float sobel(sampler2D image, vec2 pos)
     return sqrt(pow(gx, 2.0) + pow(gy, 2.0));
 }
 
-void main()
-{
-    float magnitude = sobel(image, texCoords);
+void main() {
+    float magnitude = sobel(source, texCoord);
 
-    gl_FragColor = texture2D(image, texCoords) * (magnitude > 0.7 ? 0.1 : 1.0);
+    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? multiplier : 1.0);
     gl_FragColor.a = 1.0;
 }

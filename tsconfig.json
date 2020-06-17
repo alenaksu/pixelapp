@@ -1,5 +1,5 @@
 {
-    "include": ["src", "types"],
+    "include": ["src", "global.d.ts"],
     "exclude": ["node_modules"],
     "compilerOptions": {
         // You can't currently define paths in your 'extends' config,
@@ -7,20 +7,27 @@
         // Don't change these unless you know what you're doing.
         // See: https://github.com/microsoft/TypeScript/issues/25430
         "baseUrl": "./",
-        "paths": { "*": ["web_modules/.types/*"] },
+        "paths": {
+             // Define either ONE of these...
+            // 1. General support: matches everything relative to the project directory
+            "*": ["*"],
+            // 2. Explicit support: match only your mounted directories (Recommended!)
+            "src/*": ["src/*"],
+            "public/*": ["public/*"]
+        },
         // Feel free to add/edit new config options below:
         // ...
+        // "lib": ["DOM", "ES2015", "ES2020"],
         "module": "esnext",
         "target": "esnext",
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
-        /* noEmit - We only use TypeScript for type checking. */
+        // /* noEmit - We only use TypeScript for type checking. */
         "noEmit": true,
-        /* Additional Options */
+        // /* Additional Options */
         "strict": false,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noImplicitAny": false,
-        "typeRoots": ["./types.d.ts"]
+        "noImplicitAny": false
     }
 }

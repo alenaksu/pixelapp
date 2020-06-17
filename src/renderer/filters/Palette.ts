@@ -2,11 +2,11 @@ import Filter from '../Filter';
 import { createFramebuffer } from '../utils';
 
 export default class Palette extends Filter {
-    paletteTexture = null;
+    paletteTexture: WebGLTexture = null;
     parameters = {
         paletteSize: 0,
         ditherMatrix: [
-            [0, 48, 12, 60, 3, 51, 15, 63],
+            [1, 48, 12, 60, 3, 51, 15, 63],
             [32, 16, 44, 28, 35, 19, 47, 31],
             [8, 56, 4, 52, 11, 59, 7, 55],
             [40, 24, 36, 20, 43, 27, 39, 23],
@@ -16,15 +16,16 @@ export default class Palette extends Filter {
             [42, 26, 38, 22, 41, 25, 37, 21],
         ]
             .flat()
-            .map((n) => (n + 1) / 64),
+            .map((n) => (n + 1) / 64 - 0.5),
         ditherThreshold: 0.5,
+        ditherSize: 1.0,
     };
 
     static get fragmentShader() {
         return `
             precision highp float;
 
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             uniform vec2 resolution;
             uniform float paletteSize;
             uniform sampler2D image;
@@ -32,7 +33,8 @@ export default class Palette extends Filter {
             uniform sampler2D palette;
             uniform float ditherMatrix[64];
             uniform float ditherThreshold;
-            uniform float ditherGamma;
+            uniform float ditherSize;
+            const int MAX_COLORS = 256;
 
             float luma(vec4 color) {
                 return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.722;
@@ -48,12 +50,13 @@ export default class Palette extends Filter {
             }
 
             float indexValue() {
-                int x = int(mod(gl_FragCoord.x, 8.0));
-                int y = int(mod(gl_FragCoord.y, 8.0));
+                vec2 coord = floor((gl_FragCoord.xy - 0.5) / ditherSize) * ditherSize + ditherSize / 2.0;
+                int x = int(mod(coord.x, 8.0));
+                int y = int(mod(coord.y, 8.0));
 
                 for (int i = 0; i < 8; i++) {
                     for(int j = 0; j < 8; j++) {
-                        if (i == x && j == y) return ditherMatrix[(i + j * 8)];
+                        if (i == y && j == x) return ditherMatrix[(i + j * 8)];
                     }
                 }
             }
@@ -62,8 +65,8 @@ export default class Palette extends Filter {
                 vec4 closestColor = vec4(0.0, 0, 0, 1.0);
 
                 int s = int(paletteSize);
-                float best = 100000.0;
-                for(int i = 0; i < 128; i++) {
+                float best = 100.0;
+                for(int i = 0; i < MAX_COLORS; i++) {
                     if (i < s) {
                         vec4 paletteColor = texture2D(palette, vec2(float(i) / paletteSize, 0.5));
                         float distance = colorDistance(paletteColor, color);
@@ -72,7 +75,7 @@ export default class Palette extends Filter {
                             best = distance;
                             closestColor = paletteColor;
                         }
-                    }
+                    } else return closestColor;
                 }
 
                 return closestColor;
@@ -103,13 +106,14 @@ export default class Palette extends Filter {
             
             vec4 dither(vec4 color) {
                 float factor = indexValue() * ditherThreshold;
-                vec4 ditherColor = clamp(vec4(color.rgb + factor, 1.0), 0.0, 1.0);
+                vec4 ditherColor = vec4(color.rgb + factor, 1.0);
                 
                 return getClosestColor(ditherColor);
             }
 
             void main() {                    
-                vec4 color = texture2D(image, texCoords);
+                vec4 color = texture2D(image, texCoord);
+
                 gl_FragColor = dither(color);
                 gl_FragColor.a = 1.0;
             }
@@ -117,24 +121,32 @@ export default class Palette extends Filter {
     }
 
     setPalette(palette: ImageData | HTMLImageElement) {
-        const gl = this.gl;
-        const fb = createFramebuffer(gl, 256, 1);
+        if (palette) {
+            const gl = this.gl;
+            const fb = createFramebuffer(gl, 256, 1);
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fb.buffer);
-        gl.bindTexture(gl.TEXTURE_2D, fb.texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, palette);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb.buffer);
+            gl.bindTexture(gl.TEXTURE_2D, fb.texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, palette);
+            //gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, palette.width, 1, gl.RGBA, gl.UNSIGNED_BYTE, palette);
 
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.deleteFramebuffer(fb.buffer);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.deleteFramebuffer(fb.buffer);
 
-        this.parameters.paletteSize = palette.width;
-        this.paletteTexture = fb.texture;
+            this.parameters.paletteSize = palette.width;
+            this.paletteTexture = fb.texture;
+        } else {
+            this.parameters.paletteSize = 0;
+            this.paletteTexture = null;
+        }
     }
 
     use() {
         const { gl, paletteTexture, program } = this;
-        if (!paletteTexture) return;
+        if (!paletteTexture) {
+            return;
+        }
 
         super.use();
 
@@ -144,8 +156,12 @@ export default class Palette extends Filter {
 
         const paletteLocation = gl.getUniformLocation(program, 'palette');
         gl.uniform1i(paletteLocation, 2);
+    }
 
-        //gl.activeTexture(gl.TEXTURE1);
-        //gl.bindTexture(gl.TEXTURE_2D, null);
+    clear() {
+        const { gl } = this;
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE0);
     }
 }

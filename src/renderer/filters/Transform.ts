@@ -16,7 +16,7 @@ export default class Transform extends Filter {
         return `
             precision highp float;
 
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             
             uniform sampler2D image;
             uniform vec2 resolution;
@@ -37,35 +37,35 @@ export default class Transform extends Filter {
                 
                 // Why isn't this a loop? Some graphics chips can get be very slow if they
                 // can't tell at compile time which texture reads are needed
-                vec4 tex00 = texture2D(image, texCoords + vec2(-off2.x, -off2.y));
-                vec4 tex10 = texture2D(image, texCoords + vec2(-off.x, -off2.y));
-                vec4 tex20 = texture2D(image, texCoords + vec2(0.0, -off2.y));
-                vec4 tex30 = texture2D(image, texCoords + vec2(off.x, -off2.y));
-                vec4 tex40 = texture2D(image, texCoords + vec2(off2.x, -off2.y));
+                vec4 tex00 = texture2D(image, texCoord + vec2(-off2.x, -off2.y));
+                vec4 tex10 = texture2D(image, texCoord + vec2(-off.x, -off2.y));
+                vec4 tex20 = texture2D(image, texCoord + vec2(0.0, -off2.y));
+                vec4 tex30 = texture2D(image, texCoord + vec2(off.x, -off2.y));
+                vec4 tex40 = texture2D(image, texCoord + vec2(off2.x, -off2.y));
                 
-                vec4 tex01 = texture2D(image, texCoords + vec2(-off2.x, -off.y));
-                vec4 tex11 = texture2D(image, texCoords + vec2(-off.x, -off.y));
-                vec4 tex21 = texture2D(image, texCoords + vec2(0.0, -off.y));
-                vec4 tex31 = texture2D(image, texCoords + vec2(off.x, -off.y));
-                vec4 tex41 = texture2D(image, texCoords + vec2(off2.x, -off.y));
+                vec4 tex01 = texture2D(image, texCoord + vec2(-off2.x, -off.y));
+                vec4 tex11 = texture2D(image, texCoord + vec2(-off.x, -off.y));
+                vec4 tex21 = texture2D(image, texCoord + vec2(0.0, -off.y));
+                vec4 tex31 = texture2D(image, texCoord + vec2(off.x, -off.y));
+                vec4 tex41 = texture2D(image, texCoord + vec2(off2.x, -off.y));
                 
-                vec4 tex02 = texture2D(image, texCoords + vec2(-off2.x, 0.0));
-                vec4 tex12 = texture2D(image, texCoords + vec2(-off.x, 0.0));
-                vec4 tex22 = texture2D(image, texCoords + vec2(0.0, 0.0));
-                vec4 tex32 = texture2D(image, texCoords + vec2(off.x, 0.0));
-                vec4 tex42 = texture2D(image, texCoords + vec2(off2.x, 0.0));
+                vec4 tex02 = texture2D(image, texCoord + vec2(-off2.x, 0.0));
+                vec4 tex12 = texture2D(image, texCoord + vec2(-off.x, 0.0));
+                vec4 tex22 = texture2D(image, texCoord + vec2(0.0, 0.0));
+                vec4 tex32 = texture2D(image, texCoord + vec2(off.x, 0.0));
+                vec4 tex42 = texture2D(image, texCoord + vec2(off2.x, 0.0));
                 
-                vec4 tex03 = texture2D(image, texCoords + vec2(-off2.x, off.y));
-                vec4 tex13 = texture2D(image, texCoords + vec2(-off.x, off.y));
-                vec4 tex23 = texture2D(image, texCoords + vec2(0.0, off.y));
-                vec4 tex33 = texture2D(image, texCoords + vec2(off.x, off.y));
-                vec4 tex43 = texture2D(image, texCoords + vec2(off2.x, off.y));
+                vec4 tex03 = texture2D(image, texCoord + vec2(-off2.x, off.y));
+                vec4 tex13 = texture2D(image, texCoord + vec2(-off.x, off.y));
+                vec4 tex23 = texture2D(image, texCoord + vec2(0.0, off.y));
+                vec4 tex33 = texture2D(image, texCoord + vec2(off.x, off.y));
+                vec4 tex43 = texture2D(image, texCoord + vec2(off2.x, off.y));
                 
-                vec4 tex04 = texture2D(image, texCoords + vec2(-off2.x, off2.y));
-                vec4 tex14 = texture2D(image, texCoords + vec2(-off.x, off2.y));
-                vec4 tex24 = texture2D(image, texCoords + vec2(0.0, off2.y));
-                vec4 tex34 = texture2D(image, texCoords + vec2(off.x, off2.y));
-                vec4 tex44 = texture2D(image, texCoords + vec2(off2.x, off2.y));
+                vec4 tex04 = texture2D(image, texCoord + vec2(-off2.x, off2.y));
+                vec4 tex14 = texture2D(image, texCoord + vec2(-off.x, off2.y));
+                vec4 tex24 = texture2D(image, texCoord + vec2(0.0, off2.y));
+                vec4 tex34 = texture2D(image, texCoord + vec2(off.x, off2.y));
+                vec4 tex44 = texture2D(image, texCoord + vec2(off2.x, off2.y));
                 
                 vec4 tex = tex22;
                 

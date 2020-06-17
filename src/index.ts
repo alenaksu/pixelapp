@@ -6,7 +6,7 @@ import * as dat from 'dat.gui';
 import { medianCut } from './filters/index';
 import quantize from './filters/octree';
 import './filters/pix';
-import { iteratePixels } from './utils';
+import { iteratePixels, getImageData } from './utils';
 import { create } from './renderer/index';
 
 const MAX_SIZE = 600;
@@ -27,10 +27,11 @@ const canvas = <HTMLCanvasElement>document.querySelector('#canvas');
 const preview = <HTMLImageElement>document.querySelector('#image');
 const palette = <HTMLDivElement>document.querySelector('#palette');
 const generatePalette = <HTMLButtonElement>document.querySelector('#generatePalette');
+const resetPalette = <HTMLButtonElement>document.querySelector('#resetPalette');
 let image: HTMLImageElement;
 let paletteImage: HTMLImageElement;
 const transform = {
-    maxSize: 1024,
+    maxSize: 800,
     colors: 24,
     pixelate: 1,
     blur: 1,
@@ -69,13 +70,16 @@ function setupGui() {
     transformFolder.add(renderer.Transform.parameters, 'blur', 0, 5, 0.01).onChange(update);
     transformFolder.add(renderer.Transform.parameters, 'sharpen', -2, 2, 0.01).onChange(update);
     transformFolder.add(renderer.Transform.parameters, 'saturation', 0, 2, 0.01).onChange(update);
-    transformFolder.add(renderer.Transform.parameters, 'warmth', -0.08, 0.08, 0.001).onChange(update);
+    transformFolder
+        .add(renderer.Transform.parameters, 'warmth', -0.08, 0.08, 0.001)
+        .onChange(update);
     transformFolder.add(renderer.Transform.parameters, 'brightness', 0, 2, 0.01).onChange(update);
     transformFolder.add(renderer.Transform.parameters, 'contrast', 0, 2, 0.01).onChange(update);
     transformFolder.add(renderer.Transform.parameters, 'grey', 0, 1, 0.01).onChange(update);
     // transform.add(renderer.Transform.parameters, 'gamma', 0.1, 10, 0.1).onChange(update);
 
-    gui.add(renderer.Palette.parameters, 'ditherThreshold', 0, 1, 0.001).listen().onChange(update);
+    gui.add(renderer.Palette.parameters, 'ditherThreshold', 0, 0.5, 0.001).listen().onChange(update);
+    gui.add(renderer.Palette.parameters, 'ditherSize', 0, 15, 1).listen().onChange(update);
 }
 setupGui();
 
@@ -91,10 +95,9 @@ function loadImage(file: File) {
             1,
         );
 
-        image.width *= ratio;
-        image.height *= ratio;
+       const imageData = getImageData(image, image.width * ratio, image.height * ratio);
 
-        renderer.setSource(image);
+        renderer.setSource(imageData);
     };
     image.src = URL.createObjectURL(file);
 
@@ -124,16 +127,7 @@ paletteFile.addEventListener('change', (event) => {
 
     const paletteImage = new Image();
     paletteImage.onload = () => {
-        const c = document.createElement('canvas');
-        c.width = paletteImage.width;
-        c.height = paletteImage.height;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(paletteImage, 0, 0);
-
-        //const imageData = ctx.getImageData(0, 0, c.width, c.height);
-        // const palette = medianCut(imageData, 24);
-
-        const palette = ctx.getImageData(0, 0, c.width, c.height);
+        const palette = getImageData(paletteImage);
 
         renderer.Palette.parameters.ditherThreshold = 1 / palette.width;
         //palette.data.set(palette);
@@ -145,19 +139,25 @@ paletteFile.addEventListener('change', (event) => {
     paletteImage.src = URL.createObjectURL(imageFile);
 });
 
+resetPalette.addEventListener('click', (e) => {
+    e.preventDefault();
+    renderer.Palette.setPalette(null);
+    update();
+});
+
 generatePalette.addEventListener('click', (e) => {
     e.preventDefault();
     const method = Number(prompt('Choose a method: 1 = median-cut, 2 = octree', '1'));
     const colors = Number(prompt('How many colors?', '24'));
 
-    const c = document.createElement('canvas');
-    c.width = image.width;
-    c.height = image.height;
-    const ctx = c.getContext('2d');
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, c.width, c.height);
+    const imageData = renderer.source;
 
     const palette = method === 1 ? medianCut(imageData, colors) : quantize(imageData, colors);
+    // const q =  medianCut(imageData, 256); //quantize(imageData, 128);
+    // const p = new ImageData(q.length, 1);
+    // p.data.set(q.flat());
+    // const palette = quantize(p, colors);
+
     const paletteData = new ImageData(palette.length, 1);
     paletteData.data.set(palette.flat());
 

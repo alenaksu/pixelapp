@@ -47,3 +47,19 @@ export function getPixelMatrix(offset: number, size: number, imageData: ImageDat
 
     return matrix;
 }
+
+export function luma(color) {
+    return color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.722;
+}
+
+export function getImageData(image: HTMLImageElement, width = image.width, height = image.height) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    return imageData;
+}

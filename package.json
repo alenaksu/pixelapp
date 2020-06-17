@@ -17,7 +17,7 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
-    "dat.gui": "^0.7.7",
-    "mathjs": "^7.0.0"
-  }
+    "dat.gui": "^0.7.7"
+  },
+  "types": "./types.d.ts"
 }

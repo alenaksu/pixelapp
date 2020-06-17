@@ -9,7 +9,11 @@ module.exports = {
     },
     installOptions: {
         rollup: {
-            plugins: [require('rollup-plugin-glslify')()],
+            plugins: [
+                require('rollup-plugin-glslify')({
+                    compress: true,
+                }),
+            ],
         },
     },
     devOptions: {},

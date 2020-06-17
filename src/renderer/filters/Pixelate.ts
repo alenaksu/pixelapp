@@ -7,20 +7,20 @@ export default class Pixelate extends Filter {
 
     static get fragmentShader() {
         return `
-            precision mediump float;
+            precision highp float;
 
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             uniform sampler2D image;
+            uniform sampler2D source;
             uniform vec2 resolution;
             uniform float pixelSize;
 
             void main() {
-                vec2 pos = texCoords.xy;
+                vec2 tileSize = vec2(pixelSize - 0.001);
+                vec2 coord = (floor((gl_FragCoord.xy - 0.5) / tileSize) * tileSize + tileSize / 2.0) * resolution;
+                vec4 color = texture2D(image, coord);
 
-                vec2 dxy = pixelSize * resolution;
-                vec2 coord = dxy * floor(texCoords / dxy) + dxy / 2.0;
-                
-                gl_FragColor = texture2D(image, coord);
+                gl_FragColor = color;
             }
         `;
     }

@@ -1,4 +1,4 @@
-import { iteratePixels } from '../utils';
+import { iteratePixels, luma } from '../utils';
 
 type RGBAColor = [number, number, number, number];
 
@@ -32,11 +32,11 @@ class Octree {
         this.levels[level].push(node);
     }
 
-    getPalette() {
+    getPalette(): Array<RGBAColor> {
         const { colorCount, levels, leaves } = this;
 
         for (let i = Octree.MAX_DEPTH - 2; i >= 0; i--) {
-            const nodes = [...levels[i]].sort((a,b) => a.getPixelCount() - b.getPixelCount());
+            const nodes = [...levels[i]].sort((a, b) => a.getPixelCount() - b.getPixelCount());
             for (const node of nodes) {
                 node.mergeLeaves();
 
@@ -48,7 +48,7 @@ class Octree {
             levels[i].length = 0;
         }
 
-        return [...leaves].map(node => node.getColor());
+        return [...leaves].map((node) => node.getColor());
     }
 }
 
@@ -127,8 +127,8 @@ class OctreeNode {
         }
     }
 
-    getColor() {
-        return this.color.map((n) => Math.round(n / this.pixelCount));
+    getColor(): RGBAColor {
+        return <RGBAColor>this.color.map((n) => Math.round(n / this.pixelCount));
     }
 
     removeNode(node: OctreeNode) {
@@ -142,5 +142,8 @@ export default function quantize(image: ImageData, colors: number) {
 
     for (const [rgba] of iteratePixels(image)) octree.addColor(rgba);
 
-    return octree.getPalette();
+    const palette = octree.getPalette();
+    palette.sort((a, b) => luma(a) - luma(b));
+
+    return palette;
 }

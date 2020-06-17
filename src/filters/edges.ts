@@ -5,8 +5,7 @@
 4. Apply double threshold to determine potential edges
 5. Track edge by hysteresis: Finalize the detection of edges by suppressing all the other edges that are weak and not connected to strong edges.
  */
-import * as math from 'mathjs';
-import { iteratePixels, getPixel, getPixelMatrix } from '../utils';
+import { getPixelMatrix } from '../utils';
 
 const kernelX = [
     [-1, 0, 1],
@@ -19,18 +18,6 @@ const kernelY = [
     [0, 0, 0],
     [1, 2, 1],
 ];
-
-function generateGreyscaleData(imageData: ImageData) {
-    const greyscale = [];
-    for (const [rgb, x, y] of iteratePixels(imageData)) {
-        if (!greyscale[y]) greyscale[y] = [];
-        if (!greyscale[x]) greyscale[x] = [];
-
-        greyscale[x][y] = math.mean(rgb);
-    }
-
-    return greyscale;
-}
 
 /**
  * https://en.wikipedia.org/wiki/Kernel_(image_processing)#Convolution

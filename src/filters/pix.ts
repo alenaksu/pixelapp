@@ -1,5 +1,4 @@
 import { iteratePixels } from '../utils';
-import * as mathjs from 'mathjs';
 
 type RGBColor = [number, number, number];
 

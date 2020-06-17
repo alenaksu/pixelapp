@@ -9,13 +9,13 @@ export default class Posterize extends Filter {
         return `
             precision mediump float;
 
-            varying vec2 texCoords;
+            varying vec2 texCoord;
             uniform sampler2D image;
             uniform vec2 resolution;
             uniform float levels;
 
             void main() {
-                vec3 color = texture2D(image, texCoords).rgb;
+                vec3 color = texture2D(image, texCoord).rgb;
                 /*
                 vec3 coefficients = vec3(0.2126, 0.7152, 0.0722);
 

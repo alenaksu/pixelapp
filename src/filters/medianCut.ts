@@ -1,3 +1,5 @@
+import { luma } from '../utils';
+
 type Bucket = Array<[number, number, number, number]>;
 
 export function quantize(bucket: Bucket, imageData: ImageData) {
@@ -66,6 +68,6 @@ export default function medianCut(imageData: ImageData, colors: number = 256): A
     }
 
     const palette = splitBucket(bucket, imageData, Math.round(Math.log2(colors)));
-
+    palette.sort((a, b) => luma(a) - luma(b));
     return palette;
 }
