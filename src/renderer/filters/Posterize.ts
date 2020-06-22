@@ -2,7 +2,7 @@ import Filter from '../Filter';
 
 export default class Posterize extends Filter {
     parameters = {
-        levels: 10
+        levels: 10,
     };
 
     static get fragmentShader() {

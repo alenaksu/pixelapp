@@ -6,12 +6,7 @@ import Sobel from './filters/Sobel/index';
 import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
 
-interface Renderer {
-    setSource(image: ImageData);
-    registerFilter(FilterClass: typeof Filter);
-}
-
-class Renderer {
+export class Renderer {
     [name: string]: Filter | any;
     source?: ImageData;
     gl: WebGLRenderingContext;
@@ -41,7 +36,7 @@ class Renderer {
 
     registerFilter(FilterClass: typeof Filter) {
         const instance = new FilterClass(this.gl);
-        this[FilterClass.name] = instance;
+        this.filters[FilterClass.name] = instance;
         this.filters.push(instance);
     }
 

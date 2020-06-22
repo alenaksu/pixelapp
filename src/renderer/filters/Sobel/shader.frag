@@ -30,6 +30,7 @@ float sobel(sampler2D image, vec2 pos)
         1.0, 0.0, -1.0,
         2.0, 0.0, -2.0,
         1.0, 0.0, -1.0);
+        
     mat3 kernelY = mat3(
         1.0, 2.0, 1.0,
         0.0, 0.0, 0.0,
@@ -44,6 +45,6 @@ float sobel(sampler2D image, vec2 pos)
 void main() {
     float magnitude = sobel(source, texCoord);
 
-    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? multiplier : 1.0);
+    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? (multiplier + 1.0) : 1.0);
     gl_FragColor.a = 1.0;
 }

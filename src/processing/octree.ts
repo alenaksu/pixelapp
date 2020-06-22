@@ -137,7 +137,7 @@ class OctreeNode {
     }
 }
 
-export default function quantize(image: ImageData, colors: number) {
+export default function octree(image: ImageData, colors: number) {
     const octree = new Octree(colors);
 
     for (const [rgba] of iteratePixels(image)) octree.addColor(rgba);

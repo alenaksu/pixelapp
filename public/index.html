@@ -1,77 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Snowpack App</title>
+        <title>Pisellator</title>
         <meta charset="utf-8" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="./favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Web site created using create-snowpack-app" />
         <link
+            href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap"
             rel="stylesheet"
-            href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
         />
         <link
             rel="stylesheet"
             href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"
         />
-        <link
+        <!-- <link
             rel="stylesheet"
             href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css"
-        />
-        <link rel="stylesheet" type="text/css" href="/index.css" />
+        /> -->
+        <link rel="stylesheet" type="text/css" href="./index.css" />
     </head>
     <body>
-        <div id="main" class="column">
-            <canvas id="canvas"></canvas>
-        </div>
-        <div id="sidebar" class="column toolbar">
-            <div>
-                <label class="button"
-                    >Open image
-                    <input
-                        class="file-input"
-                        type="file"
-                        id="fileInput"
-                        accept="image/png, image/jpeg"
-                        style="display: none;"
-                    />
-                </label>
-            </div>
-            <div>
-                <img id="image" src="" />
-            </div>
-            <div id="controls"></div>
-            <div>
-                <div class="row">
-                    <h4 class="column">Palette</h4>
-                    <div class="column-60 column">
-                        <label class="button button-small"
-                            >Import
-                            <input
-                                class="file-input"
-                                type="file"
-                                id="paletteInput"
-                                accept="image/png, image/jpeg"
-                                style="display: none;"
-                            />
-                        </label>
-                        <button id="generatePalette" class="button button-small">Generate</button>
-                        <button id="resetPalette" class="button button-small">Reset</button>
-                    </div>
-                </div>
-                <div id="palette"></div>
-            </div>
-        </div>
-
-        <script type="module" src="/_dist_/index.js"></script>
-        <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    --></body>
+        <pis-app></pis-app>
+        <script type="module" src="../src/index.ts"></script>
+    </body>
 </html>

@@ -1,23 +1,37 @@
 {
-  "name": "pisellator",
-  "scripts": {
-    "start": "snowpack dev",
-    "build": "snowpack build",
-    "test": "echo \"This template does not include a test runner by default.\" && exit 1",
-    "format": "prettier --write 'src/**/*.js'",
-    "lint": "prettier --check 'src/**/*.js'"
-  },
-  "devDependencies": {
-    "@snowpack/plugin-babel": "^0.7.0",
-    "@types/dat.gui": "^0.7.5",
-    "@types/mathjs": "^6.0.5",
-    "prettier": "^2.0.0",
-    "rollup-plugin-glslify": "^1.2.0",
-    "snowpack": "^2.0.0",
-    "typescript": "^3.9.3"
-  },
-  "dependencies": {
-    "dat.gui": "^0.7.7"
-  },
-  "types": "./types.d.ts"
+    "name": "pisellator",
+    "private": true,
+    "scripts": {
+        "start": "parcel public/index.html --open",
+        "start:snow": "snowpack dev",
+        "test": "echo \"This template does not include a test runner by default.\" && exit 1",
+        "format": "prettier --write 'src/**/*.[j|t]s'",
+        "lint": "prettier --check 'src/**/*.[j|t]s'",
+        "build": "rimraf dist && rollup -c rollup.config.js",
+        "start:build": "npm run build && es-dev-server --root-dir dist --app-index index.html --compatibility none --open"
+    },
+    "devDependencies": {
+        "@babel/preset-typescript": "^7.10.1",
+        "@snowpack/plugin-babel": "^1.0.0",
+        "parcel": "^2.0.0-beta.1",
+        "postcss-modules": "^2.0.0",
+        "prettier": "^2.0.0",
+        "snowpack": "^2.5.2",
+        "typescript": "^3.9.5"
+    },
+    "dependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.10.1",
+        "@babel/plugin-proposal-decorators": "^7.10.3",
+        "@spectrum-web-components/bundle": "^0.12.0",
+        "@spectrum-web-components/slider": "^0.4.9",
+        "@spectrum-web-components/styles": "^0.5.3",
+        "@spectrum-web-components/themes": "^0.2.3",
+        "@tiny-lit/element": "^2.0.0-alpha.6",
+        "@tiny-lit/store": "^2.0.0-alpha.6",
+        "lit-element": "^2.3.1"
+    },
+    "types": "./types.d.ts",
+    "browerslist": [
+        "Chrome > 50"
+    ]
 }

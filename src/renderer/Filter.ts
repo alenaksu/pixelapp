@@ -68,7 +68,7 @@ export default class Filter {
 
             const value = allUniforms[name];
             if (Array.isArray(value)) {
-                const array = new  Float32Array(value);
+                const array = new Float32Array(value);
                 switch (value.length) {
                     case 1:
                         gl.uniform1fv(location, array);

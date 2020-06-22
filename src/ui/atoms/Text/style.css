@@ -1,0 +1,124 @@
+:host {
+    --background-color: #454646;
+    --border-color: #333434;
+    --shadow-color: #737373;
+    --shadow-color-focused: #0036ff;
+    --height: 30px;
+    --width: 15px;
+    --border-radius: 4px;
+
+    --track-height: 20px;
+    --track-background-color: #454646;
+    --track-border-color: #333434;
+    --track-border-radius: 5px;
+}
+
+.input,
+.text,
+.large {
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+    background-clip: padding-box;
+    vertical-align: top;
+    outline: none;
+}
+
+.input:disabled,
+.text:disabled,
+.large:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.text,
+.large {
+    line-height: 1.313rem;
+    font-size: 12px;
+    letter-spacing: 0;
+    padding: 0 0.563rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #454646;
+    box-shadow: inset 0 1px rgba(0, 0, 0, 0.05);
+    color: #c6c8c8;
+    vertical-align: top;
+}
+
+.text:focus,
+.large:focus {
+    background-color: #595b5b;
+    color: #fff;
+    border: 1px solid #0036ff;
+    box-shadow: 0 0 0 2px #6fb5f1;
+}
+
+.text:disabled::-webkit-input-placeholder {
+    color: #fff;
+}
+
+.text:disabled::-moz-placeholder {
+    color: #fff;
+}
+
+.text:disabled:-ms-input-placeholder {
+    color: #fff;
+}
+
+.text:invalid {
+    border: 1px solid #ec514e;
+}
+
+/* topdoc
+  name: Large Text Input
+  description: A bigger input, still for text.
+  modifiers:
+    :disabled: Disabled state
+    :focus: Focused
+    :invalid: Hover state
+  markup:
+    <input type="text" class="large" value="" placeholder="text">
+    <br>
+    <br>
+    <input type="text" class="large" value="" placeholder="text" disabled>
+    <br>
+    <br>
+    <input type="text" class="large" placeholder="text" value="fail" pattern="not-fail">
+  tags:
+    - desktop
+    - light
+    - mobile
+    - form
+    - input
+    - large
+*/
+
+.large {
+    line-height: 1.688rem;
+    font-size: 0.875rem;
+}
+
+.large:disabled {
+    color: #fff;
+}
+
+.large:disabled::-webkit-input-placeholder {
+    color: #fff;
+}
+
+.large:disabled::-moz-placeholder {
+    color: #fff;
+}
+
+.large:disabled:-ms-input-placeholder {
+    color: #fff;
+}
+
+.large:invalid {
+    border: 1px solid #ec514e;
+}

@@ -1,5 +1,5 @@
 module.exports = {
-    plugins: ['@snowpack/plugin-babel'],
+    plugins: ['@snowpack/plugin-babel', './tools/glslPlugin.js'],
     scripts: {
         'mount:public': 'mount public --to /',
         'mount:src': 'mount src --to /_dist_',
