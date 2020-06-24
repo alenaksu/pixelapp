@@ -43,7 +43,7 @@ const FilterKnobs = [
     },
     { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
     { name: 'Palette.ditherSize', min: 0, max: 15, step: 1, value: 1, label: 'Dither size' },
-    { name: 'Sobel.threshold', min: 0, max: 2, step: 0.001, value: 0.3, label: 'Edge threshold' },
+    { name: 'Sobel.threshold', min: 0, max: 1, step: 0.001, value: 0.3, label: 'Edge threshold' },
     { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size' },
     { name: 'Sobel.multiplier', min: -1, max: 1, step: 0.01, value: 0, label: 'Edge multiplier' },
 ];

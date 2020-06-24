@@ -7,14 +7,15 @@ import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
 
 type FiltersArray = Array<Filter> & {
-    [name: string]: any
-}
+    [name: string]: any;
+};
 
 export class Renderer {
     [name: string]: Filter | any;
     source?: TexImageSource;
     gl: WebGLRenderingContext;
     filters: FiltersArray = <FiltersArray>[];
+    debug: boolean = false;
 
     constructor(public canvas: HTMLCanvasElement) {
         const gl: WebGLRenderingContext = canvas.getContext('webgl', { antialias: false });
@@ -76,7 +77,7 @@ export class Renderer {
     }
 
     draw() {
-        const { gl, source, filters } = this;
+        const { gl, source, filters, debug } = this;
 
         this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
@@ -88,16 +89,22 @@ export class Renderer {
         this.drawSource();
 
         const enabledFilters = filters.filter(({ enabled }) => enabled);
+
+        debug && console.group('draw');
         for (const filter of enabledFilters) {
             // set the framebuffer to render to
             gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[0].buffer);
             // this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+            debug && console.time(filter.constructor.name);
 
             // "Activate" the filter
             filter.use();
 
             // Draw to fbo
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+            debug && console.timeEnd(filter.constructor.name);
 
             // send result to framebuffer texture
             gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
@@ -107,6 +114,7 @@ export class Renderer {
 
             [frameBuffers[0], frameBuffers[1]] = [frameBuffers[1], frameBuffers[0]];
         }
+        debug && console.groupEnd();
 
         // const data = new Uint8ClampedArray(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
         // gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, data);

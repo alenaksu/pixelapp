@@ -9,35 +9,30 @@ uniform float multiplier;
 
 float convolute(mat3 kernel, sampler2D image, vec2 pos)
 {
-    vec4 color = vec4(0);
-    float sum = 0.0;
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            vec2 samplePos = pos + vec2(i - 1, j - 1) * resolution * size;
-            vec4 sampleColor = texture2D(image, samplePos);
+    vec4 tex00 = texture2D(image, pos + vec2(-1, -1) * resolution * size) * kernel[0][0];
+    vec4 tex01 = texture2D(image, pos + vec2(0, -1) * resolution * size) * kernel[0][1];
+    vec4 tex02 = texture2D(image, pos + vec2(1, -1) * resolution * size) * kernel[0][2];
 
-            color += sampleColor * kernel[i][j];
-            sum = kernel[i][j];
-        }
-    }
+    vec4 tex10 = texture2D(image, pos + vec2(-1, 0) * resolution * size) * kernel[1][0];
+    vec4 tex11 = texture2D(image, pos + vec2(0, 0) * resolution * size) * kernel[1][1];
+    vec4 tex12 = texture2D(image, pos + vec2(1, 0) * resolution * size) * kernel[1][2];
 
-    return (color.r + color.g + color.b) / sum / 3.0;
+    vec4 tex20 = texture2D(image, pos + vec2(-1, 1) * resolution * size) * kernel[2][0];
+    vec4 tex21 = texture2D(image, pos + vec2(0, 1) * resolution * size) * kernel[2][1];
+    vec4 tex22 = texture2D(image, pos + vec2(1, 1) * resolution * size) * kernel[2][2];
+
+    float maxWeight = max(max(max(max(max(max(max(max(kernel[0][0], kernel[0][1]), kernel[0][2]), kernel[1][0]), kernel[1][1]), kernel[1][2]), kernel[2][0]), kernel[2][1]), kernel[2][2]);
+
+    vec4 color = tex00 + tex01 + tex02 + tex10 + tex11 + tex12 + tex20 + tex21 + tex22;
+    // Normalize value to 0..1
+    color.rgb /= maxWeight;
+
+    return (color.r + color.g + color.b) / 3.0;
+
 }
 
 float sobel(sampler2D image, vec2 pos)
 {
-    // mat3 kernelX = mat3(
-    //     1.0, 0.0, -1.0,
-    //     2.0, 0.0, -2.0,
-    //     1.0, 0.0, -1.0);
-        
-    // mat3 kernelY = mat3(
-    //     1.0, 2.0, 1.0,
-    //     0.0, 0.0, 0.0,
-    //     -1.0, -2.0, -1.0);
-
     mat3 kernelX = mat3(
         47.0, 0.0, -47.0,
         162.0, 0.0, -162.0,
