@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS, query, property } from 'lit-element';
 import {
-    UploadToCloudOutlineIcon,
+    ImageCheckedOutIcon,
     MovieCameraIcon,
     VideoCheckedOutIcon,
 } from '@spectrum-web-components/icons-workflow';
@@ -216,7 +216,7 @@ class App extends LitElement {
         return html`
             <div id="action-bar" class="scrollable">
                 <sp-action-button quiet @click="${this.handleOpenImage}">
-                    <span slot="icon">${UploadToCloudOutlineIcon()}</span>
+                    <span slot="icon">${ImageCheckedOutIcon()}</span>
                 </sp-action-button>
                 <sp-action-button quiet @click="${this.handleOpenCamera}">
                     <span slot="icon">${MovieCameraIcon()}</span>
