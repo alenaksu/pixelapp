@@ -6,11 +6,15 @@ import Sobel from './filters/Sobel/index';
 import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
 
+type FiltersArray = Array<Filter> & {
+    [name: string]: any
+}
+
 export class Renderer {
     [name: string]: Filter | any;
-    source?: ImageData;
+    source?: TexImageSource;
     gl: WebGLRenderingContext;
-    filters: Filter[] = [];
+    filters: FiltersArray = <FiltersArray>[];
 
     constructor(public canvas: HTMLCanvasElement) {
         const gl: WebGLRenderingContext = canvas.getContext('webgl', { antialias: false });
@@ -123,7 +127,7 @@ export class Renderer {
         }
     }
 
-    setSource(newSource: ImageData) {
+    setSource(newSource: TexImageSource) {
         this.source = newSource;
 
         this.canvas.width = newSource.width;

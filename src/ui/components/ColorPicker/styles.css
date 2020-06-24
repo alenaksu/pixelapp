@@ -1,5 +1,7 @@
 :host {
     display: inline-block;
+    position: relative;
+    overflow: hidden;
 }
 
 .color {
@@ -11,4 +13,10 @@
 
 .color:hover {
     opacity: 0.8;
+}
+
+
+input {
+    visibility: hidden;
+    position: absolute;
 }

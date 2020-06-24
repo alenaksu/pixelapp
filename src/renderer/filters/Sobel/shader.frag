@@ -10,6 +10,7 @@ uniform float multiplier;
 float convolute(mat3 kernel, sampler2D image, vec2 pos)
 {
     vec4 color = vec4(0);
+    float sum = 0.0;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -18,23 +19,34 @@ float convolute(mat3 kernel, sampler2D image, vec2 pos)
             vec4 sampleColor = texture2D(image, samplePos);
 
             color += sampleColor * kernel[i][j];
+            sum = kernel[i][j];
         }
     }
 
-    return (color.r + color.g + color.b) / 3.0;
+    return (color.r + color.g + color.b) / sum / 3.0;
 }
 
 float sobel(sampler2D image, vec2 pos)
 {
+    // mat3 kernelX = mat3(
+    //     1.0, 0.0, -1.0,
+    //     2.0, 0.0, -2.0,
+    //     1.0, 0.0, -1.0);
+        
+    // mat3 kernelY = mat3(
+    //     1.0, 2.0, 1.0,
+    //     0.0, 0.0, 0.0,
+    //     -1.0, -2.0, -1.0);
+
     mat3 kernelX = mat3(
-        1.0, 0.0, -1.0,
-        2.0, 0.0, -2.0,
-        1.0, 0.0, -1.0);
+        47.0, 0.0, -47.0,
+        162.0, 0.0, -162.0,
+        47.0, 0.0, -47.0);
         
     mat3 kernelY = mat3(
-        1.0, 2.0, 1.0,
+        47.0, 162.0, 47.0,
         0.0, 0.0, 0.0,
-        -1.0, -2.0, -1.0);
+        -47.0, -162.0, -47.0);
 
     float gx = convolute(kernelX, image, pos);
     float gy = convolute(kernelY, image, pos);

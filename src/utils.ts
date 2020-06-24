@@ -1,4 +1,4 @@
-import { RGBAColor } from './types';
+import { RGBAColor, MimeTypes } from './types';
 
 export function getPixel(
     x: number,
@@ -138,11 +138,11 @@ export function hslToRgb(h, s, l) {
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-export function openImageFile() {
+export function openFile(type: MimeTypes = MimeTypes.Image) {
     return new Promise((resolve, reject) => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'image/png, image/jpeg';
+        input.accept = type;
 
         input.onchange = () => {
             resolve(input.files.item(0));

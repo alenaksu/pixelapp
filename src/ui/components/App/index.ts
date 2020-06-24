@@ -1,9 +1,14 @@
 import { LitElement, html, unsafeCSS, query, property } from 'lit-element';
-import { UploadToCloudOutlineIcon } from '@spectrum-web-components/icons-workflow';
+import {
+    UploadToCloudOutlineIcon,
+    MovieCameraIcon,
+    VideoCheckedOutIcon,
+} from '@spectrum-web-components/icons-workflow';
 import styles from 'bundle-text:./styles.css';
 import { create, Renderer } from '../../../renderer';
-import { loadImage, openImageFile } from '../../../utils';
+import { loadImage, openFile } from '../../../utils';
 import '../PaletteEditor';
+import { MimeTypes } from '../../../types';
 
 const FilterKnobs = [
     {
@@ -38,7 +43,7 @@ const FilterKnobs = [
     },
     { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
     { name: 'Palette.ditherSize', min: 0, max: 15, step: 1, value: 1, label: 'Dither size' },
-    { name: 'Sobel.threshold', min: 0, max: 1, step: 0.001, value: 0.3, label: 'Edge threshold' },
+    { name: 'Sobel.threshold', min: 0, max: 2, step: 0.001, value: 0.3, label: 'Edge threshold' },
     { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size' },
     { name: 'Sobel.multiplier', min: -1, max: 1, step: 0.01, value: 0, label: 'Edge multiplier' },
 ];
@@ -49,6 +54,8 @@ class App extends LitElement {
 
     @property({ type: String })
     private imageSrc: string = '';
+
+    private video?: HTMLVideoElement;
 
     @query('pis-palette-editor')
     private paletteEditor;
@@ -72,14 +79,75 @@ class App extends LitElement {
         });
 
         this.knobs = knobs;
-        this.update({ knobs });
+        this.requestUpdate();
     }
 
-    handleUploadImage() {
-        if (this.imageSrc.startsWith('blob:')) URL.revokeObjectURL(this.imageSrc);
+    clear() {
+        const { video, imageSrc } = this;
 
-        openImageFile().then((file) => {
+        if (imageSrc && imageSrc.startsWith('blob:')) URL.revokeObjectURL(imageSrc);
+        if (video) {
+            if (video.srcObject) (<MediaStream>video.srcObject).getTracks().forEach((t) => t.stop());
+            if (video.src && video.src.startsWith('blob:')) URL.revokeObjectURL(video.src);
+        }
+        this.video = null;
+        this.imageSrc = null;
+    }
+
+    handleOpenImage() {
+        this.clear();
+
+        openFile().then((file) => {
             this.imageSrc = URL.createObjectURL(file);
+        });
+    }
+
+    // TODO sistemare
+    handleOpenCamera() {
+        this.clear();
+
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            const video = (this.video = document.createElement('video'));
+
+            video.srcObject = stream;
+            video.play().then(() => {
+                video.width = video.videoWidth;
+                video.height = video.videoHeight;
+
+                this.renderer.setSource(video);
+
+                const update = () => {
+                    this.renderer.draw();
+                    this.video && requestAnimationFrame(update);
+                };
+
+                requestAnimationFrame(update);
+            });
+        }, console.error);
+    }
+
+    // TODO sistemare
+    handleOpenVideo() {
+        this.clear();
+
+        openFile(MimeTypes.Video).then((file) => {
+            const video = (this.video = document.createElement('video'));
+            video.src = URL.createObjectURL(file);
+
+            video.play().then(() => {
+                video.width = video.videoWidth;
+                video.height = video.videoHeight;
+
+                this.renderer.setSource(video);
+
+                const update = () => {
+                    this.renderer.draw();
+                    this.video && requestAnimationFrame(update);
+                };
+
+                requestAnimationFrame(update);
+            });
+            video.onended = video.play.bind(video);
         });
     }
 
@@ -101,7 +169,9 @@ class App extends LitElement {
 
         this.knobs[
             'Palette.ditherThreshold'
-        ] = this.renderer.filters.Palette.parameters.ditherThreshold = 1 / palette.width;
+        ] = this.renderer.filters.Palette.parameters.ditherThreshold = palette
+            ? 1 / palette.width
+            : 0;
 
         this.requestUpdate();
         this.renderer.draw();
@@ -110,9 +180,15 @@ class App extends LitElement {
     update(changedProperties) {
         super.update(changedProperties);
 
-        loadImage(this.imageSrc).then((image: ImageData) => {
-            this.renderer.setSource(image);
-        });
+        if (
+            changedProperties.has('imageSrc') &&
+            changedProperties.get('imageSrc') !== this.imageSrc
+        ) {
+            loadImage(this.imageSrc).then((image: ImageData) => {
+                this.renderer.setSource(image);
+                this.paletteEditor.image = image;
+            });
+        }
     }
 
     renderKnobs() {
@@ -139,8 +215,15 @@ class App extends LitElement {
     render() {
         return html`
             <div id="action-bar" class="scrollable">
-                <sp-action-button quiet @click="${this.handleUploadImage}">
+                <sp-action-button quiet @click="${this.handleOpenImage}">
                     <span slot="icon">${UploadToCloudOutlineIcon()}</span>
+                </sp-action-button>
+                <sp-action-button quiet @click="${this.handleOpenCamera}">
+                    <span slot="icon">${MovieCameraIcon()}</span>
+                </sp-action-button>
+
+                <sp-action-button quiet @click="${this.handleOpenVideo}">
+                    <span slot="icon">${VideoCheckedOutIcon()}</span>
                 </sp-action-button>
             </div>
             <div id="main">
