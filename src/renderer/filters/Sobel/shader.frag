@@ -28,7 +28,6 @@ float convolute(mat3 kernel, sampler2D image, vec2 pos)
     color.rgb /= maxWeight;
 
     return (color.r + color.g + color.b) / 3.0;
-
 }
 
 float sobel(sampler2D image, vec2 pos)
