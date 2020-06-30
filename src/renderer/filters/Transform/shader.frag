@@ -11,6 +11,7 @@ uniform float brightness;
 uniform float contrast;
 uniform float sharpenRadius;
 uniform float hue;
+uniform float vibrance;
 
 const vec3 saturationVector = vec3(0.299, 0.587, 0.114);
 const float PI = 3.1415926535897932384626433832795;
@@ -79,6 +80,12 @@ void main() {
     vec3 desaturated = vec3(dot(saturationVector, color.rgb));
     vec3 mixed = mix(desaturated, color.rgb, saturation);
     color = vec4(mixed, color.a);
+
+    // Vibrance
+    float average = (color.r + color.g + color.b) / 3.0;
+    float maxChannel = max(color.r, max(color.g, color.b));
+    float vibranceAmount = (maxChannel - average) * (-vibrance * 3.0);
+    color.rgb = mix(color.rgb, vec3(maxChannel), vibranceAmount);
     
     // Temperature
     float t = temperature / 4.0;
@@ -89,7 +96,8 @@ void main() {
     color.rgb = brightness < 0.0 ? color.rgb * (1.0 + brightness) : color.rgb + ((1.0 - color.rgb) * brightness);
 
     // Contrast
-    color.rgb = (color.rgb - 0.5) * (tan((contrast + 1.0) * (PI / 4.0))) + 0.5;
+    // color.rgb = (color.rgb - 0.5) * (tan((contrast + 1.0) * (PI / 4.0))) + 0.5;
+    color.rgb = (color.rgb - 0.5) * (contrast + 1.0) + 0.5;
 
     // color.rgb = pow(color.rgb, vec3(1.0 / gamma));
     

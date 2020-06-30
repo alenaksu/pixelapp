@@ -10,6 +10,7 @@ export default class Transform extends Filter {
         sharpenRadius: 1,
         brightness: 0,
         contrast: 0,
+        vibrance: 0,
     };
 
     static get fragmentShader() {

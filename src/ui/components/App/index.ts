@@ -18,7 +18,7 @@ const FilterKnobs = [
         step: 1,
         value: 1,
         label: 'Pixel Size',
-        variant: undefined,
+        variant: 'ramp',
     },
     { name: 'Transform.contrast', min: -1, max: 1, step: 0.01, value: 0, label: 'Contrast' },
     {
@@ -32,6 +32,7 @@ const FilterKnobs = [
     { name: 'Transform.temperature', min: -1, max: 1, step: 0.01, value: 0, label: 'Temperature' },
     { name: 'Transform.hue', min: -1, max: 1, step: 0.01, value: 0, label: 'Hue' },
     { name: 'Transform.saturation', min: 0, max: 2, step: 0.01, value: 1, label: 'Saturation' },
+    { name: 'Transform.vibrance', min: -1, max: 1, step: 0.01, value: 0, label: 'Vibrance' },
     // { name: 'grey', min: 0, max: 1, step: 0.01, value: 0.5, label: 'Grey' },
     { name: 'Transform.sharpen', min: -2, max: 2, step: 0.01, value: 0, label: 'Sharpen/Blur' },
     {
@@ -41,11 +42,12 @@ const FilterKnobs = [
         step: 0.1,
         value: 0,
         label: 'Sharpen radius',
+        variant: 'ramp'
     },
     { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
-    { name: 'Palette.ditherSize', min: 0, max: 15, step: 1, value: 1, label: 'Dither size' },
+    { name: 'Palette.ditherSize', min: 0, max: 15, step: 1, value: 1, label: 'Dither size', variant: 'ramp' },
     { name: 'Sobel.threshold', min: 0, max: 1, step: 0.001, value: 0.3, label: 'Edge threshold' },
-    { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size' },
+    { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size', variant: 'ramp' },
     { name: 'Sobel.multiplier', min: -1, max: 1, step: 0.01, value: 0, label: 'Edge multiplier' },
 ];
 
