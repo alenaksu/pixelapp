@@ -79,6 +79,8 @@ export class Renderer {
     draw() {
         const { gl, source, filters, debug } = this;
 
+        if (!source) return;
+
         this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
         let frameBuffers = [

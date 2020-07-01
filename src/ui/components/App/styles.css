@@ -16,6 +16,10 @@
     justify-content: flex-start;
 }
 
+#action-bar sp-rule {
+    margin: 5px 0;
+}
+
 #main {
     flex-grow: 1;
     padding: 20px;

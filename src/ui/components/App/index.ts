@@ -3,6 +3,7 @@ import {
     ImageCheckedOutIcon,
     MovieCameraIcon,
     VideoCheckedOutIcon,
+    UndoIcon
 } from '@spectrum-web-components/icons-workflow';
 import styles from 'bundle-text:./styles.css';
 import { create, Renderer } from '../../../renderer';
@@ -40,12 +41,20 @@ const FilterKnobs = [
         min: 0,
         max: 10,
         step: 0.1,
-        value: 0,
+        value: 1,
         label: 'Sharpen radius',
-        variant: 'ramp'
+        variant: 'ramp',
     },
     { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
-    { name: 'Palette.ditherSize', min: 0, max: 15, step: 1, value: 1, label: 'Dither size', variant: 'ramp' },
+    {
+        name: 'Palette.ditherSize',
+        min: 0,
+        max: 15,
+        step: 1,
+        value: 1,
+        label: 'Dither size',
+        variant: 'ramp',
+    },
     { name: 'Sobel.threshold', min: 0, max: 1, step: 0.001, value: 0.3, label: 'Edge threshold' },
     { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size', variant: 'ramp' },
     { name: 'Sobel.multiplier', min: -1, max: 1, step: 0.01, value: 0, label: 'Edge multiplier' },
@@ -65,6 +74,7 @@ class App extends LitElement {
 
     private renderer: Renderer;
 
+    @property({ type: Object, attribute: false })
     private knobs: object = {};
 
     static get styles() {
@@ -82,7 +92,6 @@ class App extends LitElement {
         });
 
         this.knobs = knobs;
-        this.requestUpdate();
     }
 
     clear() {
@@ -90,7 +99,8 @@ class App extends LitElement {
 
         if (imageSrc && imageSrc.startsWith('blob:')) URL.revokeObjectURL(imageSrc);
         if (video) {
-            if (video.srcObject) (<MediaStream>video.srcObject).getTracks().forEach((t) => t.stop());
+            if (video.srcObject)
+                (<MediaStream>video.srcObject).getTracks().forEach((t) => t.stop());
             if (video.src && video.src.startsWith('blob:')) URL.revokeObjectURL(video.src);
         }
         this.video = null;
@@ -158,11 +168,7 @@ class App extends LitElement {
         return ({ target: { value } }) => {
             const { renderer, knobs } = this;
 
-            knobs[knobName] = value;
-            const [filterName, paramName] = knobName.split('.');
-            renderer.filters[filterName].parameters[paramName] = value;
-
-            renderer.draw();
+            this.setKnob(knobName, value);
         };
     }
 
@@ -170,14 +176,7 @@ class App extends LitElement {
         const palette = this.paletteEditor.palette;
         (<any>this.renderer.filters).Palette.setPalette(palette);
 
-        this.knobs[
-            'Palette.ditherThreshold'
-        ] = this.renderer.filters.Palette.parameters.ditherThreshold = palette
-            ? 1 / palette.width
-            : 0;
-
-        this.requestUpdate();
-        this.renderer.draw();
+        this.setKnob('Palette.ditherThreshold', palette ? 1 / palette.width : 0);
     }
 
     update(changedProperties) {
@@ -192,6 +191,25 @@ class App extends LitElement {
                 this.paletteEditor.image = image;
             });
         }
+
+        if (this.renderer && changedProperties.has('knobs')) {
+            this.renderer.draw();
+        }
+    }
+
+    handleResetFiltersClick() {
+        for (const knob of FilterKnobs) {
+            this.setKnob(knob.name, knob.value);
+        }
+    }
+
+    setKnob(name, value) {
+        this.knobs = {
+            ...this.knobs,
+            [name]: value,
+        };
+        const [filterName, propName] = name.split('.');
+        this.renderer.filters[filterName].parameters[propName] = value;
     }
 
     renderKnobs() {
@@ -227,6 +245,12 @@ class App extends LitElement {
 
                 <sp-action-button quiet @click="${this.handleOpenVideo}">
                     <span slot="icon">${VideoCheckedOutIcon()}</span>
+                </sp-action-button>
+
+                <sp-rule size="small"></sp-rule>
+
+                <sp-action-button quiet @click="${this.handleResetFiltersClick}">
+                    <span slot="icon">${UndoIcon()}</span>
                 </sp-action-button>
             </div>
             <div id="main">
