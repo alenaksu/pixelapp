@@ -7,6 +7,7 @@ export default class Filter {
     positionLocation: number;
     parameters: object = {};
     enabled: boolean = true;
+    name: string = 'Filter';
 
     static get vertexShader() {
         return `

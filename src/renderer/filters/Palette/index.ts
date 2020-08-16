@@ -3,6 +3,8 @@ import { createFramebuffer } from '../../utils';
 import fragment from 'bundle-text:./shader.frag';
 
 export default class Palette extends Filter {
+    name: string = 'Palette';
+
     paletteTexture: WebGLTexture = null;
     parameters = {
         paletteSize: 0,

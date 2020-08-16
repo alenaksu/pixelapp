@@ -85,7 +85,7 @@ class App extends LitElement {
         const knobs = {};
         this.renderer = create(this.canvas);
         this.renderer.filters.forEach((filter) => {
-            const name = filter.constructor.name;
+            const name = filter.name;
             for (const knobName of Object.keys(filter.parameters)) {
                 knobs[`${name}.${knobName}`] = filter.parameters[knobName];
             }

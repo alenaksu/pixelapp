@@ -2,6 +2,8 @@ import Filter from '../../Filter';
 import fragment from 'bundle-text:./shader.frag';
 
 export default class Transform extends Filter {
+    name: string = 'Transform';
+
     parameters = {
         saturation: 1,
         hue: 0,

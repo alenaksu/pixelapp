@@ -1,6 +1,8 @@
 import Filter from '../Filter';
 
 export default class FlipY extends Filter {
+    name: string = 'FlipY';
+
     static get vertexShader() {
         return `
             attribute vec2 position;

@@ -1,6 +1,8 @@
 import Filter from '../Filter';
 
 export default class Posterize extends Filter {
+    name: string = 'Posterize';
+    
     parameters = {
         levels: 10,
     };

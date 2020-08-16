@@ -1,6 +1,8 @@
 import Filter from '../Filter';
 
 export default class Pixelate extends Filter {
+    name: string = 'Pixelize';
+
     parameters = {
         pixelSize: 1,
     };

@@ -41,7 +41,7 @@ export class Renderer {
 
     registerFilter(FilterClass: typeof Filter) {
         const instance = new FilterClass(this.gl);
-        this.filters[FilterClass.name] = instance;
+        this.filters[instance.name] = instance;
         this.filters.push(instance);
     }
 
@@ -98,7 +98,7 @@ export class Renderer {
             gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[0].buffer);
             // this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-            debug && console.time(filter.constructor.name);
+            debug && console.time(filter.name);
 
             // "Activate" the filter
             filter.use();
@@ -106,7 +106,7 @@ export class Renderer {
             // Draw to fbo
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-            debug && console.timeEnd(filter.constructor.name);
+            debug && console.timeEnd(filter.name);
 
             // send result to framebuffer texture
             gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
