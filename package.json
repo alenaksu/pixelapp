@@ -2,12 +2,12 @@
     "name": "pixelapp",
     "private": true,
     "scripts": {
-        "start": "parcel public/index.html --open",
+        "start": "parcel public/index.html --open --dist-dir docs",
         "start:snow": "snowpack dev",
         "test": "echo \"This template does not include a test runner by default.\" && exit 1",
         "format": "prettier --write 'src/**/*.[j|t]s'",
         "lint": "prettier --check 'src/**/*.[j|t]s'",
-        "build": "rimraf dist && parcel build public/index.html",
+        "build": "rimraf dist && parcel build public/index.html --dist-dir docs",
         "start:rollup": "rimraf dist && rollup --config rollup.config.js --watch & es-dev-server --http2 --root-dir dist --app-index index.html --compatibility none --open"
     },
     "devDependencies": {
