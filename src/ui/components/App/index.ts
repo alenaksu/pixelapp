@@ -42,7 +42,7 @@ const FilterKnobs = [
         max: 10,
         step: 0.1,
         value: 1,
-        label: 'Unsharp mask',
+        label: 'Unsharp mask size',
         variant: 'ramp',
     },
     { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
