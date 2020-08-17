@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 
 varying vec2 texCoord;
 
@@ -93,11 +93,14 @@ void main() {
     color.b -= t;
 
     // Brightness
-    color.rgb = brightness < 0.0 ? color.rgb * (1.0 + brightness) : color.rgb + ((1.0 - color.rgb) * brightness);
+    color.rgb = brightness < 0.0 
+        ? color.rgb * (1.0 + brightness / 2.0) 
+        : color.rgb + ((1.0 - color.rgb) * brightness / 2.0);
 
     // Contrast
-    // color.rgb = (color.rgb - 0.5) * (tan((contrast + 1.0) * (PI / 4.0))) + 0.5;
-    color.rgb = (color.rgb - 0.5) * (contrast + 1.0) + 0.5;
+    float slant = tan((contrast / 2.0 + 1.0) * (PI / 4.0));
+    color.rgb = (color.rgb - 0.5) * slant + 0.5;
+    //color.rgb = (color.rgb - 0.5) * (contrast + 1.0) + 0.5;
 
     // color.rgb = pow(color.rgb, vec3(1.0 / gamma));
     
