@@ -3,13 +3,15 @@ import {
     ImageCheckedOutIcon,
     MovieCameraIcon,
     VideoCheckedOutIcon,
-    UndoIcon
+    UndoIcon,
+    MoveLeftRightIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from 'bundle-text:./styles.css';
 import { create, Renderer } from '../../../renderer';
 import { loadImage, openFile } from '../../../utils';
-import '../PaletteEditor';
 import { MimeTypes } from '../../../types';
+import '../PaletteEditor';
+import '../ImageComparison';
 
 const FilterKnobs = [
     {
@@ -76,6 +78,9 @@ class App extends LitElement {
 
     @property({ type: Object, attribute: false })
     private knobs: object = {};
+
+    @property({ type: Boolean })
+    imageComparison: boolean = false;
 
     static get styles() {
         return unsafeCSS(styles);
@@ -203,6 +208,10 @@ class App extends LitElement {
         }
     }
 
+    toggleImageComparison() {
+        this.imageComparison = !this.imageComparison;
+    }
+
     setKnob(name, value) {
         this.knobs = {
             ...this.knobs,
@@ -237,24 +246,38 @@ class App extends LitElement {
         return html`
             <div id="action-bar" class="scrollable">
                 <sp-action-button quiet @click="${this.handleOpenImage}">
-                    <span slot="icon">${ImageCheckedOutIcon()}</span>
+                    <sp-icon slot="icon">${ImageCheckedOutIcon()}</sp-icon>
                 </sp-action-button>
                 <sp-action-button quiet @click="${this.handleOpenCamera}">
-                    <span slot="icon">${MovieCameraIcon()}</span>
+                    <sp-icon slot="icon">${MovieCameraIcon()}</sp-icon>
                 </sp-action-button>
 
                 <sp-action-button quiet @click="${this.handleOpenVideo}">
-                    <span slot="icon">${VideoCheckedOutIcon()}</span>
+                    <sp-icon slot="icon">${VideoCheckedOutIcon()}</sp-icon>
                 </sp-action-button>
 
                 <sp-rule size="small"></sp-rule>
 
                 <sp-action-button quiet @click="${this.handleResetFiltersClick}">
-                    <span slot="icon">${UndoIcon()}</span>
+                    <sp-icon slot="icon">${UndoIcon()}</sp-icon>
+                </sp-action-button>
+
+                <sp-rule size="small"></sp-rule>
+
+                <sp-action-button
+                    quiet
+                    toggles
+                    .selected=${this.imageComparison}
+                    @click="${this.toggleImageComparison}"
+                >
+                    <sp-icon slot="icon">${MoveLeftRightIcon()}</sp-icon>
                 </sp-action-button>
             </div>
             <div id="main">
-                <canvas id="canvas"></canvas>
+                <pis-image-comparison .enable="${this.imageComparison}">
+                    <img slot="original" src="${this.imageSrc}" />
+                    <canvas slot="modified" id="canvas"></canvas>
+                </pis-image-comparison>
             </div>
             <div id="sidebar" class="scrollable">
                 ${this.imageSrc

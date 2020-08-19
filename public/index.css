@@ -3,12 +3,12 @@
 /* @import '@spectrum-web-components/styles/theme-light.css'; */
 @import '@spectrum-web-components/styles/theme-dark.css';
 @import '@spectrum-web-components/styles/scale-medium.css';
+@import '@spectrum-web-components/styles/typography.css';
 
 html,
 body {
     width: 100%;
     height: 100%;
-    font-family: 'Open Sans', sans-serif;
 }
 
 html {
