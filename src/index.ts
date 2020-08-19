@@ -9,8 +9,4 @@ import './ui/components/App/index';
 
 import image from 'url:../public/imgs/colosseo.jpg';
 
-fetch(image)
-    .then((response) => response.blob())
-    .then((blob) => {
-        document.querySelector('pis-app').imageSrc = URL.createObjectURL(new File([blob], 'image.jpg'));
-    });
+(<any>document.querySelector('pis-app')).imageSrc = image;
