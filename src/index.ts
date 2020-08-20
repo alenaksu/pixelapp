@@ -3,7 +3,7 @@
  * When you're ready to start on your site, clear the file. Happy hacking!
  **/
 import '@spectrum-web-components/bundle/elements.js';
-import '@spectrum-web-components/themes';
+// import '@spectrum-web-components/themes';
 import './ui/components/App/index';
 
 import image from 'url:../public/imgs/colosseo.jpg';
