@@ -5,6 +5,8 @@ import {
     VideoCheckedOutIcon,
     UndoIcon,
     MoveLeftRightIcon,
+    FolderOpenIcon,
+    CompareIcon
 } from '@spectrum-web-components/icons-workflow';
 import styles from 'bundle-text:./styles.css';
 import { create, Renderer } from '../../../renderer';
@@ -81,6 +83,9 @@ class App extends LitElement {
 
     @property({ type: Boolean })
     imageComparison: boolean = false;
+
+    @property({ type: String })
+    private currentPanelTab: string = 'adjust';
 
     static get styles() {
         return unsafeCSS(styles);
@@ -223,7 +228,7 @@ class App extends LitElement {
 
     renderKnobs() {
         return html`
-            <form class="panel-group">
+            <form class="panel-group" .hidden=${this.currentPanelTab !== 'adjust'}>
                 ${FilterKnobs.map(
                     (knob) => html`
                         <sp-slider
@@ -242,21 +247,39 @@ class App extends LitElement {
         `;
     }
 
+    renderPalette() {
+        return html`
+            <div class="panel-group" .hidden=${this.currentPanelTab !== 'palette'}>
+                <pis-palette-editor @change="${this.handlePaletteChange}"></pis-palette-editor>
+            </div>
+        `;
+    }
+
+    handlePanelTabChange(e) {
+        this.currentPanelTab = e.target.selected;
+    }
+
     render() {
         return html`
-            <div id="action-bar" class="scrollable">
-                <sp-action-button quiet @click="${this.handleOpenImage}">
-                    <sp-icon slot="icon">${ImageCheckedOutIcon()}</sp-icon>
-                </sp-action-button>
-                <sp-action-button quiet @click="${this.handleOpenCamera}">
-                    <sp-icon slot="icon">${MovieCameraIcon()}</sp-icon>
-                </sp-action-button>
+            <div id="menuBar">
+            </div>
 
-                <sp-action-button quiet @click="${this.handleOpenVideo}">
-                    <sp-icon slot="icon">${VideoCheckedOutIcon()}</sp-icon>
-                </sp-action-button>
-
-                <sp-rule size="small"></sp-rule>
+            <div id="leftSidebar" class="scrollable sidebar">
+                <sp-action-menu>
+                    <sp-icon slot="icon">${FolderOpenIcon()}</sp-icon>
+                    <!-- <span slot="label">Open</span> -->
+                    <sp-menu>
+                        <sp-menu-item @click="${this.handleOpenImage}">
+                            <sp-icon slot="icon">${ImageCheckedOutIcon()}</sp-icon>Image
+                        </sp-menu-item>
+                        <sp-menu-item>
+                            <sp-icon slot="icon">${VideoCheckedOutIcon()}</sp-icon>Video
+                        </sp-menu-item>
+                        <sp-menu-item @click="${this.handleOpenCamera}">
+                            <sp-icon slot="icon">${MovieCameraIcon()}</sp-icon>Camera
+                        </sp-menu-item>
+                    </sp-menu>
+                </sp-action-menu>
 
                 <sp-action-button quiet @click="${this.handleResetFiltersClick}">
                     <sp-icon slot="icon">${UndoIcon()}</sp-icon>
@@ -273,26 +296,22 @@ class App extends LitElement {
                     <sp-icon slot="icon">${MoveLeftRightIcon()}</sp-icon>
                 </sp-action-button>
             </div>
+
             <div id="main">
                 <pis-image-comparison .enable="${this.imageComparison}">
                     <img slot="original" src="${this.imageSrc}" />
                     <canvas slot="modified" id="canvas"></canvas>
                 </pis-image-comparison>
             </div>
-            <div id="sidebar" class="scrollable">
-                ${this.imageSrc
-                    ? html`
-                          <div class="panel-group preview">
-                              <img src="${this.imageSrc}" />
-                          </div>
-                      `
-                    : null}
-                ${this.renderKnobs()}
 
-                <sp-rule size="medium"></sp-rule>
-                <div class="panel-group">
-                    <pis-palette-editor @change="${this.handlePaletteChange}"></pis-palette-editor>
-                </div>
+            <div id="rightPanel" class="scrollable">
+                <sp-tabs selected="${this.currentPanelTab}" @change=${this.handlePanelTabChange} quiet>
+                    <sp-tab label="Adjust" value="adjust"></sp-tab>
+                    <sp-tab label="Palette" value="palette"></sp-tab>
+                </sp-tabs>
+
+                ${this.renderKnobs()}
+                ${this.renderPalette()}
             </div>
 
             <sp-icons-medium></sp-icons-medium>

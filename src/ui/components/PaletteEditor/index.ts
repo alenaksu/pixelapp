@@ -86,7 +86,6 @@ class PaletteEditor extends LitElement {
     render() {
         const { palette } = this;
         return html`
-            <h2>Palette</h2>
             <sp-button-group>
                 <sp-action-button @click="${this.handleImportClick}">Import</sp-action-button>
                 <sp-action-button @click="${this.handleCreateClick}">Create</sp-action-button>

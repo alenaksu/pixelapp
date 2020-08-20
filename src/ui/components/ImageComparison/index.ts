@@ -1,7 +1,11 @@
 import { html, LitElement, unsafeCSS, property, query } from 'lit-element';
 import { styleMap } from 'lit-html/directives/style-map.js';
 import styles from 'bundle-text:./styles.css';
-import { MoveLeftRightIcon } from '@spectrum-web-components/icons-workflow';
+import {
+    MoveLeftRightIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+} from '@spectrum-web-components/icons-workflow';
 
 export class ImageComparison extends LitElement {
     static get styles() {
@@ -45,7 +49,10 @@ export class ImageComparison extends LitElement {
                           style=${styleMap({ left: `${this.position * 100}%` })}
                           @mousedown="${this.handleDragStart}"
                       >
-                          <span class="icon">${MoveLeftRightIcon()}</span>
+                          <div class="dragger">
+                              <sp-icon>${ChevronLeftIcon()}</sp-icon>
+                              <sp-icon>${ChevronRightIcon()}</sp-icon>
+                          </div>
                       </div>
                   `
                 : null}
