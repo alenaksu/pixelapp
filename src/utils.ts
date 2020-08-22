@@ -162,7 +162,7 @@ export function rgbToHex(color: RGBAColor, denormalize: boolean = true): string 
         .join('')}`;
 }
 
-export function hexToRgb(color: string, normalize: boolean = true): number[] {
+export function hexToRgb(color: string, normalize: boolean = true): RGBAColor {
     const d = normalize ? 255 : 1;
     return [
         parseInt(color.slice(1, 3), 16) / d,

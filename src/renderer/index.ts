@@ -34,8 +34,8 @@ export class Renderer {
         // this.registerFilter(Posterize);
         this.registerFilter(Transform);
         this.registerFilter(Sobel);
-        this.registerFilter(Palette);
         this.registerFilter(Pixelate);
+        this.registerFilter(Palette);
         this.registerFilter(FlipY);
     }
 

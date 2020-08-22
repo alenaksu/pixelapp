@@ -6,7 +6,7 @@ import {
     UndoIcon,
     MoveLeftRightIcon,
     FolderOpenIcon,
-    CompareIcon
+    CompareIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from 'bundle-text:./styles.css';
 import { create, Renderer } from '../../../renderer';
@@ -176,17 +176,22 @@ class App extends LitElement {
 
     handleKnobChange(knobName) {
         return ({ target: { value } }) => {
-            const { renderer, knobs } = this;
-
             this.setKnob(knobName, value);
         };
     }
 
     handlePaletteChange() {
         const palette = this.paletteEditor.palette;
-        (<any>this.renderer.filters).Palette.setPalette(palette);
+        if (palette && palette.length) {
+            console.log(new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1));
+            (<any>this.renderer.filters).Palette.setPalette(
+                new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1),
+            );
+        } else {
+            (<any>this.renderer.filters).Palette.setPalette(null);
+        }
 
-        this.setKnob('Palette.ditherThreshold', palette ? 1 / palette.width : 0);
+        this.setKnob('Palette.ditherThreshold', palette ? 1 / palette.length : 0);
     }
 
     update(changedProperties) {
@@ -261,8 +266,7 @@ class App extends LitElement {
 
     render() {
         return html`
-            <div id="menuBar">
-            </div>
+            <div id="menuBar"></div>
 
             <div id="leftSidebar" class="scrollable sidebar">
                 <sp-action-menu>
@@ -305,13 +309,16 @@ class App extends LitElement {
             </div>
 
             <div id="rightPanel" class="scrollable">
-                <sp-tabs selected="${this.currentPanelTab}" @change=${this.handlePanelTabChange} quiet>
+                <sp-tabs
+                    selected="${this.currentPanelTab}"
+                    @change=${this.handlePanelTabChange}
+                    quiet
+                >
                     <sp-tab label="Adjust" value="adjust"></sp-tab>
                     <sp-tab label="Palette" value="palette"></sp-tab>
                 </sp-tabs>
 
-                ${this.renderKnobs()}
-                ${this.renderPalette()}
+                ${this.renderKnobs()} ${this.renderPalette()}
             </div>
 
             <sp-icons-medium></sp-icons-medium>

@@ -1,8 +1,6 @@
-import { html, LitElement, unsafeCSS, property, query } from 'lit-element';
-import { styleMap } from 'lit-html/directives/style-map.js';
+import { html, LitElement, unsafeCSS, property } from 'lit-element';
 import styles from 'bundle-text:./styles.css';
 import {
-    MoveLeftRightIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
 } from '@spectrum-web-components/icons-workflow';
@@ -12,21 +10,23 @@ export class ImageComparison extends LitElement {
         return unsafeCSS(styles);
     }
 
-    @property({ type: Number })
-    position: number = 0.5;
-
     @property({ type: Boolean })
     enable: boolean = false;
 
     handleDrag = (e: MouseEvent) => {
-        this.position = Math.max(Math.min(e.offsetX / this.offsetWidth, 0.95), 0.05);
+        const position = Math.max(Math.min(e.offsetX / this.offsetWidth, 0.95), 0.05) * 100;
+        this.style.setProperty(
+            '--split-point',
+            `${position}%`,
+        );
     };
 
     handleDragEnd = () => {
         this.removeEventListener('mousemove', this.handleDrag);
     };
 
-    handleDragStart() {
+    handleDragStart(e) {
+        e.preventDefault();
         this.addEventListener('mousemove', this.handleDrag, { passive: true });
         document.documentElement.addEventListener('mouseup', this.handleDragEnd, { once: true });
     }
@@ -38,18 +38,11 @@ export class ImageComparison extends LitElement {
             </div>
             ${this.enable
                 ? html`
-                      <div
-                          class="image original"
-                          style=${styleMap({ width: `${100 - this.position * 100}%` })}
-                      >
+                      <div class="image original">
                           <slot name="original"></slot>
                       </div>
-                      <div
-                          class="separator"
-                          style=${styleMap({ left: `${this.position * 100}%` })}
-                          @mousedown="${this.handleDragStart}"
-                      >
-                          <div class="dragger">
+                      <div class="separator" @mousedown="${this.handleDragStart}">
+                          <div class="thumb">
                               <sp-icon>${ChevronLeftIcon()}</sp-icon>
                               <sp-icon>${ChevronRightIcon()}</sp-icon>
                           </div>
