@@ -68,7 +68,7 @@ class App extends LitElement {
     @query('#canvas')
     canvas?: HTMLCanvasElement;
 
-    @property({ type: String })
+    @property({ type: String, attribute: 'image-src' })
     private imageSrc: string = '';
 
     private video?: HTMLVideoElement;
