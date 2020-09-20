@@ -8,7 +8,7 @@ import {
     FolderOpenIcon,
     CompareIcon,
 } from '@spectrum-web-components/icons-workflow';
-import styles from 'bundle-text:./styles.css';
+import styles from './styles.css';
 import { create, Renderer } from '../../../renderer';
 import { loadImage, openFile } from '../../../utils';
 import { MimeTypes } from '../../../types';

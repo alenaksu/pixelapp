@@ -6,6 +6,6 @@ import '@spectrum-web-components/bundle/elements.js';
 // import '@spectrum-web-components/themes';
 import './ui/components/App/index';
 
-import image from 'url:../public/imgs/colosseo.jpg';
+import image from './colosseo.jpg';
 
 (<any>document.querySelector('pis-app')).imageSrc = image;

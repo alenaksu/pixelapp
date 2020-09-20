@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "@spectrum-web-components/bundle/elements.js": "./@spectrum-web-components/bundle/elements.js",
+    "@spectrum-web-components/icons-workflow": "./@spectrum-web-components/icons-workflow.js",
+    "@spectrum-web-components/styles/core-global.css": "./@spectrum-web-components/styles/core-global.css",
+    "@spectrum-web-components/styles/fonts.css": "./@spectrum-web-components/styles/fonts.css",
+    "@spectrum-web-components/styles/scale-medium.css": "./@spectrum-web-components/styles/scale-medium.css",
+    "@spectrum-web-components/styles/theme-dark.css": "./@spectrum-web-components/styles/theme-dark.css",
+    "@spectrum-web-components/styles/theme-light.css": "./@spectrum-web-components/styles/theme-light.css",
+    "@spectrum-web-components/styles/typography.css": "./@spectrum-web-components/styles/typography.css",
+    "lit-element": "./lit-element.js"
+  }
+}

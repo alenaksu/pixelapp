@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, property, query } from 'lit-element';
-import styles from 'bundle-text:./styles.css';
+import styles from './styles.css';
 
 // TODO
 class ColorPicker extends LitElement {
