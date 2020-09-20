@@ -6,8 +6,7 @@
         "test": "echo \"This template does not include a test runner by default.\" && exit 1",
         "format": "prettier --write 'src/**/*.[j|t]s'",
         "lint": "prettier --check 'src/**/*.[j|t]s'",
-        "build": "rimraf docs && snowpack build --base-url /pixelapp/ --out docs --treeshake",
-        "start:rollup": "rimraf dist && rollup --config rollup.config.js --watch & es-dev-server --http2 --root-dir dist --app-index index.html --compatibility none --open"
+        "build": "snowpack build"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.10.4",

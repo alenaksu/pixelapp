@@ -5,4 +5,15 @@ module.exports = {
         './tools/cssImportTextPlugin.js',
         '@snowpack/plugin-optimize',
     ],
+    devOptions: {
+        out: './docs',
+    },
+    installOptions: {
+        sourceMap: false,
+        treeshake: true,
+    },
+    buildOptions: {
+        baseUrl: '/pixelapp/',
+        clean: true
+    }
 };
