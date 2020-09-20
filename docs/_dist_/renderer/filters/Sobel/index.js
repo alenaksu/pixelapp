@@ -1,0 +1,1 @@
+import r from"./shader.js";import t from"../../Filter.js";export default class s extends t{constructor(...e){super(...e);this.name="Sobel",this.parameters={size:1,threshold:.3,multiplier:0}}static get fragmentShader(){return r}}

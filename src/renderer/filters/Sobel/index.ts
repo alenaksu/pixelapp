@@ -1,4 +1,4 @@
-import fragment from 'bundle-text:./shader.frag';
+import fragment from './shader.frag';
 import Filter from '../../Filter';
 
 export default class Sobel extends Filter {

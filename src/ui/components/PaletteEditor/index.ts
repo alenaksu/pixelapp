@@ -2,10 +2,10 @@ import { LitElement, html, property, unsafeCSS } from 'lit-element';
 import { rgbToHex, openFile, loadImage, iteratePixels, hexToRgb } from '../../../utils';
 import processing from '../../../processing';
 import { AddIcon } from '@spectrum-web-components/icons-workflow';
-import styles from 'bundle-text:./styles.css';
+import styles from './styles.css';
 
 import '../ColorPicker';
-import { RGBAColor } from 'src/types';
+import { RGBAColor } from '../../../types';
 
 // TODO
 class PaletteEditor extends LitElement {

@@ -1,6 +1,6 @@
 .build
 build
-web_modules
+/web_modules
 node_modules
 .parcel-cache
 dist

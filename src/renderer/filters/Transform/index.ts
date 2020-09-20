@@ -1,5 +1,5 @@
 import Filter from '../../Filter';
-import fragment from 'bundle-text:./shader.frag';
+import fragment from './shader.frag';
 
 export default class Transform extends Filter {
     name: string = 'Transform';

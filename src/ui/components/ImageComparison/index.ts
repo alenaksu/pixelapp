@@ -1,5 +1,5 @@
 import { html, LitElement, unsafeCSS, property } from 'lit-element';
-import styles from 'bundle-text:./styles.css';
+import styles from './styles.css';
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
