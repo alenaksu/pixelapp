@@ -29,6 +29,7 @@ jobs:
     - run: |
         git config --global user.name 'Alessandro'
         git config --global user.email 'alenaksu@users.noreply.github.com'
-        git commit -am "chore: build"
+        git add -A
+        git commit -m "chore: build"
         git push
 
