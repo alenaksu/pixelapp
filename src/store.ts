@@ -22,6 +22,10 @@ const initialState = {
             sharpen: {
                 amount: 0,
                 radius: 3
+            },
+            blur: {
+                radius: 0,
+                pass: 1
             }
         },
         effects: {

@@ -8,6 +8,7 @@ import UnsharpMask from './filters/UnsharpMask';
 import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
 import Dither from './filters/Dither';
+import Blur from './filters/Blur';
 
 type FiltersArray = Array<Filter> & {
     [name: string]: any;
@@ -18,7 +19,7 @@ export class Renderer {
     source?: TexImageSource;
     gl: WebGLRenderingContext;
     filters: FiltersArray = <FiltersArray>[];
-    debug: boolean = false;
+    debug: boolean = true;
 
     constructor(public canvas: HTMLCanvasElement) {
         const gl: WebGLRenderingContext = canvas.getContext('webgl', { antialias: false });
@@ -38,10 +39,11 @@ export class Renderer {
         this.registerFilter(Light);
         this.registerFilter(Color);
         // Detail?
+        this.registerFilter(Blur);
         this.registerFilter(UnsharpMask);
         this.registerFilter(EdgeDetection);
-        this.registerFilter(Dither);
         this.registerFilter(Pixelate);
+        this.registerFilter(Dither);
         this.registerFilter(Palette);
         this.registerFilter(FlipY);
     }
@@ -109,6 +111,9 @@ export class Renderer {
 
                 // "Activate" the filter
                 filter.use();
+
+                const passLocation = gl.getUniformLocation(filter.program, 'pass');
+                gl.uniform1f(passLocation, i);
 
                 // Draw to fbo
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

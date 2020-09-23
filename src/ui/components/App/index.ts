@@ -57,6 +57,8 @@ class App extends LitElement {
             this.renderer.filters.unsharpMask.parameters = store.state.editParams.detail.sharpen;
             this.renderer.filters.dither.parameters.threshold = store.state.editParams.effects.dither.threshold;
             this.renderer.filters.dither.parameters.size = store.state.editParams.effects.dither.size;
+            this.renderer.filters.blur.parameters.radius = store.state.editParams.detail.blur.radius;
+            this.renderer.filters.blur.pass = store.state.editParams.detail.blur.pass * 2;
             this.renderer.draw();
         });
     }

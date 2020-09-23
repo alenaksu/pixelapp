@@ -22,8 +22,8 @@ const SharpenControls = [
 ];
 
 const BlurControls = [
-    { name: 'detail.blur.amount', min: 0, max: 5, defaultValue: 0, label: 'Amount', step: 0.01 },
-    { name: 'detail.blur.pass', min: 0.1, max: 10, defaultValue: 5, label: 'Pass', step: 0.01 },
+    { name: 'detail.blur.radius', min: 0, max: 5, defaultValue: 0, label: 'Radius', step: 0.01 },
+    { name: 'detail.blur.pass', min: 0, max: 10, defaultValue: 1, label: 'Pass', step: 1 },
 ];
 
 const EdgeDetectionControls = [
@@ -91,6 +91,13 @@ class EditPanel extends LitElement {
                     </sp-accordion-item>
 
                     <sp-accordion-item label="Detail">
+                        <h4>Blur</h3>
+                        ${BlurControls.map(control => Slider({
+                            ...control,
+                            handleChange: null,
+                            value: control.defaultValue
+                        }))}
+
                         <h4>Sharpen</h3>
                         ${SharpenControls.map(control => Slider({
                             ...control,
