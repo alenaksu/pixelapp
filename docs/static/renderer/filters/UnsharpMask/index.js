@@ -1,0 +1,1 @@
+import t from"../../Filter.js";import a from"./shader.js";export default class e extends t{constructor(...r){super(...r);this.name="unsharpMask",this.parameters={amount:0,radius:5}}static get fragmentShader(){return a}}
