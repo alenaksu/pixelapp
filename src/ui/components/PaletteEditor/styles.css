@@ -4,7 +4,13 @@
 }
 
 .swatch {
+    background-color: var(--spectrum-global-color-gray-50);;
     margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 2px;
+}
+
+.swatch > * {
+    width: 100%;
 }

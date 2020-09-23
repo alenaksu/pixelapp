@@ -2,12 +2,12 @@ import fragment from './shader.frag';
 import Filter from '../../Filter';
 
 export default class Sobel extends Filter {
-    name: string = 'Sobel';
+    name: string = 'edgeDetection';
     
     parameters = {
-        size: 1,
+        radius: 1,
         threshold: 0.3,
-        multiplier: 0.0,
+        blend: 0.0,
     };
 
     static get fragmentShader() {

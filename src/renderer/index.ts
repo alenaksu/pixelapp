@@ -1,10 +1,13 @@
 import { createTexture, createFramebuffer } from './utils';
 import Filter from './Filter';
-import Transform from './filters/Transform';
+import Light from './filters/Light';
+import Color from './filters/Color';
 import FlipY from './filters/FlipY';
-import Sobel from './filters/Sobel/index';
+import EdgeDetection from './filters/EdgeDetection';
+import UnsharpMask from './filters/UnsharpMask';
 import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
+import Dither from './filters/Dither';
 
 type FiltersArray = Array<Filter> & {
     [name: string]: any;
@@ -32,8 +35,12 @@ export class Renderer {
 
         this.registerFilter(Filter);
         // this.registerFilter(Posterize);
-        this.registerFilter(Transform);
-        this.registerFilter(Sobel);
+        this.registerFilter(Light);
+        this.registerFilter(Color);
+        // Detail?
+        this.registerFilter(UnsharpMask);
+        this.registerFilter(EdgeDetection);
+        this.registerFilter(Dither);
         this.registerFilter(Pixelate);
         this.registerFilter(Palette);
         this.registerFilter(FlipY);
@@ -94,27 +101,27 @@ export class Renderer {
 
         debug && console.group('draw');
         for (const filter of enabledFilters) {
-            // set the framebuffer to render to
-            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[0].buffer);
-            // this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
-
             debug && console.time(filter.name);
+            for (let i = 0; i < filter.pass; i++) {
+                // set the framebuffer to render to
+                gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[0].buffer);
+                // this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-            // "Activate" the filter
-            filter.use();
+                // "Activate" the filter
+                filter.use();
 
-            // Draw to fbo
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                // Draw to fbo
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
+                // send result to framebuffer texture
+                gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
+
+                // Clear filter changes
+                filter.clear();
+
+                [frameBuffers[0], frameBuffers[1]] = [frameBuffers[1], frameBuffers[0]];
+            }
             debug && console.timeEnd(filter.name);
-
-            // send result to framebuffer texture
-            gl.bindTexture(gl.TEXTURE_2D, frameBuffers[0].texture);
-
-            // Clear filter changes
-            filter.clear();
-
-            [frameBuffers[0], frameBuffers[1]] = [frameBuffers[1], frameBuffers[0]];
         }
         debug && console.groupEnd();
 

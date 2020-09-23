@@ -19,7 +19,7 @@ class PaletteEditor extends LitElement {
         return unsafeCSS(styles);
     }
 
-    handleImportClick() {
+    importPalette() {
         openFile()
             .then((file) => loadImage(URL.createObjectURL(file)))
             .then((palette: ImageData) => {
@@ -29,7 +29,7 @@ class PaletteEditor extends LitElement {
     }
 
     // TODO move outside
-    handleCreateClick() {
+    createPalette() {
         const method = Number(prompt('Choose a method: 1 = median-cut, 2 = octree', '1'));
         const colors = Number(prompt('How many colors?', '24'));
         const imageData = this.image;
@@ -45,13 +45,13 @@ class PaletteEditor extends LitElement {
         this.fireChangeEvent();
     }
 
-    handleResetClick() {
+    resetPalette() {
         this.palette = [];
         this.fireChangeEvent();
     }
 
     fireChangeEvent() {
-        this.dispatchEvent(new Event('change'));
+        this.dispatchEvent(new Event('change', { composed: true }));
     }
 
     handleColorChange({ currentTarget }) {
@@ -87,18 +87,12 @@ class PaletteEditor extends LitElement {
     render() {
         const { palette } = this;
         return html`
-            <sp-button-group>
-                <sp-action-button @click="${this.handleImportClick}">Import</sp-action-button>
-                <sp-action-button @click="${this.handleCreateClick}">Create</sp-action-button>
-                <sp-action-button @click="${this.handleResetClick}">Reset</sp-action-button>
-            </sp-button-group>
-
             <div class="swatch">
                 ${palette && this.renderColors()}
-                <sp-action-button quiet id="addButton" @click="${this.handleAddColorClick}">
-                    <sp-icon slot="icon">${AddIcon()}</sp-icon>
-                </sp-action-button>
             </div>
+            <sp-action-button quiet id="addButton" @click="${this.handleAddColorClick}">
+                <sp-icon slot="icon">${AddIcon()}</sp-icon>
+            </sp-action-button>
         `;
     }
 }
