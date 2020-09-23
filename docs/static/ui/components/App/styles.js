@@ -2,9 +2,9 @@ export default`:host {
     width: 100vw;
     height: 100%;
     display: grid;
-    grid-template-columns: auto 1fr 350px;
+    grid-template-columns: auto 1fr 350px auto;
     grid-template-rows: auto 1fr;
-    grid-template-areas: "menuBar menuBar menuBar" "leftSidebar main rightPanel";
+    grid-template-areas: "menuBar menuBar menuBar menuBar" "leftSidebar main rightPanel rightSidebar";
 }
 
 #menuBar {
@@ -15,7 +15,7 @@ export default`:host {
 }
 
 .sidebar {
-    padding: 10px;
+    padding: 5px 8px;
     background-color: var(--spectrum-global-color-gray-100);
     color: var(--spectrum-global-color-gray-800);
     display: flex;
@@ -45,6 +45,11 @@ export default`:host {
     padding: 10px;
     background-color: var(--spectrum-global-color-gray-100);
     color: var(--spectrum-global-color-gray-800);
+}
+
+#rightSidebar {
+    grid-area: rightSidebar;
+    border-left: 2px solid var(--spectrum-global-color-gray-50);
 }
 
 #leftSidebar {

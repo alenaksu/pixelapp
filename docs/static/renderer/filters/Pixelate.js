@@ -1,4 +1,4 @@
-import i from"../Filter.js";export default class r extends i{constructor(...e){super(...e);this.name="Pixelate",this.parameters={pixelSize:1}}static get fragmentShader(){return`
+import i from"../Filter.js";export default class r extends i{constructor(...e){super(...e);this.name="pixelate",this.parameters={pixelSize:1}}static get fragmentShader(){return`
             precision highp float;
 
             varying vec2 texCoord;

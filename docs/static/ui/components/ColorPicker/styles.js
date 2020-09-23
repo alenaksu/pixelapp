@@ -1,13 +1,13 @@
 export default`:host {
-    display: inline-block;
+    display: block;
     position: relative;
     overflow: hidden;
 }
 
 .color {
     /* border-radius: var(--spectrum-alias-border-radius-regular); */
-    height: var(--spectrum-actionbutton-height, var(--spectrum-alias-single-line-height));
-    width: var(--spectrum-actionbutton-min-width, var(--spectrum-global-dimension-size-400));
+    padding-bottom: 100%;
+    height: 0;
     cursor: pointer;
 }
 
