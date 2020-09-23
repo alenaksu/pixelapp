@@ -3,23 +3,23 @@ varying vec2 texCoord;
 uniform sampler2D image;
 uniform sampler2D source;
 uniform vec2 resolution;
-uniform float size;
+uniform float radius;
 uniform float threshold;
-uniform float multiplier;
+uniform float blend;
 
 float convolute(mat3 kernel, sampler2D image, vec2 pos)
 {
-    vec4 tex00 = texture2D(image, pos + vec2(-1, -1) * resolution * size) * kernel[0][0];
-    vec4 tex01 = texture2D(image, pos + vec2(0, -1) * resolution * size) * kernel[0][1];
-    vec4 tex02 = texture2D(image, pos + vec2(1, -1) * resolution * size) * kernel[0][2];
+    vec4 tex00 = texture2D(image, pos + vec2(-1, -1) * resolution * radius) * kernel[0][0];
+    vec4 tex01 = texture2D(image, pos + vec2(0, -1) * resolution * radius) * kernel[0][1];
+    vec4 tex02 = texture2D(image, pos + vec2(1, -1) * resolution * radius) * kernel[0][2];
 
-    vec4 tex10 = texture2D(image, pos + vec2(-1, 0) * resolution * size) * kernel[1][0];
-    vec4 tex11 = texture2D(image, pos + vec2(0, 0) * resolution * size) * kernel[1][1];
-    vec4 tex12 = texture2D(image, pos + vec2(1, 0) * resolution * size) * kernel[1][2];
+    vec4 tex10 = texture2D(image, pos + vec2(-1, 0) * resolution * radius) * kernel[1][0];
+    vec4 tex11 = texture2D(image, pos + vec2(0, 0) * resolution * radius) * kernel[1][1];
+    vec4 tex12 = texture2D(image, pos + vec2(1, 0) * resolution * radius) * kernel[1][2];
 
-    vec4 tex20 = texture2D(image, pos + vec2(-1, 1) * resolution * size) * kernel[2][0];
-    vec4 tex21 = texture2D(image, pos + vec2(0, 1) * resolution * size) * kernel[2][1];
-    vec4 tex22 = texture2D(image, pos + vec2(1, 1) * resolution * size) * kernel[2][2];
+    vec4 tex20 = texture2D(image, pos + vec2(-1, 1) * resolution * radius) * kernel[2][0];
+    vec4 tex21 = texture2D(image, pos + vec2(0, 1) * resolution * radius) * kernel[2][1];
+    vec4 tex22 = texture2D(image, pos + vec2(1, 1) * resolution * radius) * kernel[2][2];
 
     float maxWeight = max(max(max(max(max(max(max(max(kernel[0][0], kernel[0][1]), kernel[0][2]), kernel[1][0]), kernel[1][1]), kernel[1][2]), kernel[2][0]), kernel[2][1]), kernel[2][2]);
 
@@ -51,6 +51,6 @@ float sobel(sampler2D image, vec2 pos)
 void main() {
     float magnitude = sobel(source, texCoord);
 
-    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? (multiplier + 1.0) : 1.0);
+    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? (blend + 1.0) : 1.0);
     gl_FragColor.a = 1.0;
 }

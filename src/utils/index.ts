@@ -1,4 +1,4 @@
-import { RGBAColor, MimeTypes } from './types';
+import { RGBAColor, MimeTypes } from '../types';
 
 export function getPixel(
     x: number,

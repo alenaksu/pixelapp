@@ -8,6 +8,7 @@ export default class Filter {
     parameters: object = {};
     enabled: boolean = true;
     name: string = 'Filter';
+    pass: number = 1;
 
     static get vertexShader() {
         return `
@@ -53,13 +54,7 @@ export default class Filter {
     setupUniforms() {
         const { gl, program, parameters } = this;
 
-        // Turn on the position attribute
-        const positionLocation = gl.getAttribLocation(this.program, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
         const allUniforms = {
-            resolution: [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight],
             ...parameters,
         };
 
@@ -109,6 +104,16 @@ export default class Filter {
                 );
             }
         }
+
+        const positionLocation = gl.getAttribLocation(program, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const resolutionLocation = gl.getUniformLocation(program, 'resolution');
+        gl.uniform2fv(resolutionLocation,  [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight]);
+
+        // const passLocation = gl.getUniformLocation(program, 'pass');
+        // gl.uniform1f(passLocation, i);
 
         const imageLocation = gl.getUniformLocation(program, 'image');
         gl.uniform1i(imageLocation, 0);

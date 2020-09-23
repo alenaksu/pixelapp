@@ -6,63 +6,18 @@ import {
     UndoIcon,
     MoveLeftRightIcon,
     FolderOpenIcon,
-    CompareIcon,
+    GearsIcon,
+    ColorPaletteIcon
 } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
 import { create, Renderer } from '../../../renderer';
 import { loadImage, openFile } from '../../../utils';
 import { MimeTypes } from '../../../types';
-import '../PaletteEditor';
-import '../ImageComparison';
+import store from '../../../store';
 
-const FilterKnobs = [
-    {
-        name: 'Pixelate.pixelSize',
-        min: 1,
-        max: 15,
-        step: 1,
-        value: 1,
-        label: 'Pixel Size',
-        variant: 'ramp',
-    },
-    { name: 'Transform.contrast', min: -1, max: 1, step: 0.01, value: 0, label: 'Contrast' },
-    {
-        name: 'Transform.brightness',
-        min: -1,
-        max: 1,
-        step: 0.01,
-        value: 0,
-        label: 'Brightness',
-    },
-    { name: 'Transform.temperature', min: -1, max: 1, step: 0.01, value: 0, label: 'Temperature' },
-    { name: 'Transform.hue', min: -1, max: 1, step: 0.01, value: 0, label: 'Hue' },
-    { name: 'Transform.saturation', min: 0, max: 2, step: 0.01, value: 1, label: 'Saturation' },
-    { name: 'Transform.vibrance', min: -1, max: 1, step: 0.01, value: 0, label: 'Vibrance' },
-    // { name: 'grey', min: 0, max: 1, step: 0.01, value: 0.5, label: 'Grey' },
-    { name: 'Transform.sharpen', min: -2, max: 2, step: 0.01, value: 0, label: 'Unsharp mask' },
-    {
-        name: 'Transform.sharpenRadius',
-        min: 0,
-        max: 10,
-        step: 0.1,
-        value: 1,
-        label: 'Unsharp mask size',
-        variant: 'ramp',
-    },
-    { name: 'Palette.ditherThreshold', min: 0, max: 1, step: 0.01, value: 0, label: 'Dither' },
-    {
-        name: 'Palette.ditherSize',
-        min: 0,
-        max: 15,
-        step: 1,
-        value: 1,
-        label: 'Dither size',
-        variant: 'ramp',
-    },
-    { name: 'Sobel.threshold', min: 0, max: 1, step: 0.001, value: 0.3, label: 'Edge threshold' },
-    { name: 'Sobel.size', min: 1, max: 15, step: 1, value: 1, label: 'Edge size', variant: 'ramp' },
-    { name: 'Sobel.multiplier', min: -1, max: 1, step: 0.01, value: 0, label: 'Edge multiplier' },
-];
+import '../PalettePanel';
+import '../ImageComparison';
+import '../EditPanel';
 
 class App extends LitElement {
     @query('#canvas')
@@ -73,8 +28,8 @@ class App extends LitElement {
 
     private video?: HTMLVideoElement;
 
-    @query('pis-palette-editor')
-    private paletteEditor;
+    @query('pis-palette-panel')
+    private palettePanel;
 
     private renderer: Renderer;
 
@@ -92,16 +47,18 @@ class App extends LitElement {
     }
 
     firstUpdated() {
-        const knobs = {};
         this.renderer = create(this.canvas);
-        this.renderer.filters.forEach((filter) => {
-            const name = filter.name;
-            for (const knobName of Object.keys(filter.parameters)) {
-                knobs[`${name}.${knobName}`] = filter.parameters[knobName];
-            }
-        });
 
-        this.knobs = knobs;
+        store.on('editParamsChanged', () => {
+            this.renderer.filters.light.parameters = store.state.editParams.light;
+            this.renderer.filters.color.parameters = store.state.editParams.color;
+            this.renderer.filters.edgeDetection.parameters = store.state.editParams.effects.edgeDetection;
+            this.renderer.filters.pixelate.parameters.pixelSize = store.state.editParams.effects.pixelate;
+            this.renderer.filters.unsharpMask.parameters = store.state.editParams.detail.sharpen;
+            this.renderer.filters.dither.parameters.threshold = store.state.editParams.effects.dither.threshold;
+            this.renderer.filters.dither.parameters.size = store.state.editParams.effects.dither.size;
+            this.renderer.draw();
+        });
     }
 
     clear() {
@@ -174,24 +131,18 @@ class App extends LitElement {
         });
     }
 
-    handleKnobChange(knobName) {
-        return ({ target: { value } }) => {
-            this.setKnob(knobName, value);
-        };
-    }
-
     handlePaletteChange() {
-        const palette = this.paletteEditor.palette;
+        const palette = this.palettePanel.editor.palette;
         if (palette && palette.length) {
             console.log(new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1));
-            (<any>this.renderer.filters).Palette.setPalette(
+            (<any>this.renderer.filters).palette.setPalette(
                 new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1),
             );
         } else {
-            (<any>this.renderer.filters).Palette.setPalette(null);
+            (<any>this.renderer.filters).palette.setPalette(null);
         }
 
-        this.setKnob('Palette.ditherThreshold', palette ? 1 / palette.length : 0);
+        store.setEditParam({name: 'effects.dither.threshold', value: palette ? 1 / palette.length : 0 });
     }
 
     update(changedProperties) {
@@ -203,65 +154,43 @@ class App extends LitElement {
         ) {
             loadImage(this.imageSrc).then((image: ImageData) => {
                 this.renderer.setSource(image);
-                this.paletteEditor.image = image;
+                this.palettePanel.editor.image = image;
             });
-        }
-
-        if (this.renderer && changedProperties.has('knobs')) {
-            this.renderer.draw();
         }
     }
 
     handleResetFiltersClick() {
-        for (const knob of FilterKnobs) {
-            this.setKnob(knob.name, knob.value);
-        }
+        // for (const knob of FilterKnobs) {
+        //     this.setKnob(knob.name, knob.value);
+        // }
     }
 
     toggleImageComparison() {
         this.imageComparison = !this.imageComparison;
     }
 
-    setKnob(name, value) {
-        this.knobs = {
-            ...this.knobs,
-            [name]: value,
-        };
-        const [filterName, propName] = name.split('.');
-        this.renderer.filters[filterName].parameters[propName] = value;
+    handleParamsChange(e) {
+        const slider = e.composedPath()[0];
+        store.setEditParam({
+            name: slider.getAttribute('name'), value: slider.value
+        })
     }
 
-    renderKnobs() {
+    renderEditPanel() {
         return html`
-            <form class="panel-group" .hidden=${this.currentPanelTab !== 'adjust'}>
-                ${FilterKnobs.map(
-                    (knob) => html`
-                        <sp-slider
-                            @input=${this.handleKnobChange(knob.name)}
-                            name="${knob.name}"
-                            min="${knob.min}"
-                            max="${knob.max}"
-                            step="${knob.step}"
-                            value="${this.knobs[knob.name]}"
-                            variant="${knob.variant || 'filled'}"
-                            label="${knob.label}"
-                        ></sp-slider>
-                    `,
-                )}
-            </form>
+            <pis-edit-panel @input="${this.handleParamsChange}" .hidden=${this.currentPanelTab !== 'adjust'}></pis-edit-panel>
         `;
     }
 
     renderPalette() {
         return html`
-            <div class="panel-group" .hidden=${this.currentPanelTab !== 'palette'}>
-                <pis-palette-editor @change="${this.handlePaletteChange}"></pis-palette-editor>
-            </div>
+            <pis-palette-panel @change="${this.handlePaletteChange}" .hidden=${this.currentPanelTab !== 'palette'}>
+            </pis-palette-panel>
         `;
     }
 
-    handlePanelTabChange(e) {
-        this.currentPanelTab = e.target.selected;
+    handlePanelTabChange = (tabName: string) => () => {
+        this.currentPanelTab = tabName;
     }
 
     render() {
@@ -270,23 +199,23 @@ class App extends LitElement {
 
             <div id="leftSidebar" class="scrollable sidebar">
                 <sp-action-menu>
-                    <sp-icon slot="icon">${FolderOpenIcon()}</sp-icon>
+                    <sp-icon size="s" slot="icon">${FolderOpenIcon()}</sp-icon>
                     <!-- <span slot="label">Open</span> -->
                     <sp-menu>
                         <sp-menu-item @click="${this.handleOpenImage}">
-                            <sp-icon slot="icon">${ImageCheckedOutIcon()}</sp-icon>Image
+                            <sp-icon size="s" slot="icon">${ImageCheckedOutIcon()}</sp-icon>Image
                         </sp-menu-item>
                         <sp-menu-item>
-                            <sp-icon slot="icon">${VideoCheckedOutIcon()}</sp-icon>Video
+                            <sp-icon size="s" slot="icon">${VideoCheckedOutIcon()}</sp-icon>Video
                         </sp-menu-item>
                         <sp-menu-item @click="${this.handleOpenCamera}">
-                            <sp-icon slot="icon">${MovieCameraIcon()}</sp-icon>Camera
+                            <sp-icon size="s" slot="icon">${MovieCameraIcon()}</sp-icon>Camera
                         </sp-menu-item>
                     </sp-menu>
                 </sp-action-menu>
 
                 <sp-action-button quiet @click="${this.handleResetFiltersClick}">
-                    <sp-icon slot="icon">${UndoIcon()}</sp-icon>
+                    <sp-icon size="s" slot="icon">${UndoIcon()}</sp-icon>
                 </sp-action-button>
 
                 <sp-rule size="small"></sp-rule>
@@ -297,7 +226,7 @@ class App extends LitElement {
                     .selected=${this.imageComparison}
                     @click="${this.toggleImageComparison}"
                 >
-                    <sp-icon slot="icon">${MoveLeftRightIcon()}</sp-icon>
+                    <sp-icon size="s" slot="icon">${MoveLeftRightIcon()}</sp-icon>
                 </sp-action-button>
             </div>
 
@@ -309,16 +238,25 @@ class App extends LitElement {
             </div>
 
             <div id="rightPanel" class="scrollable">
-                <sp-tabs
-                    selected="${this.currentPanelTab}"
-                    @change=${this.handlePanelTabChange}
+                ${this.renderEditPanel()} ${this.renderPalette()}
+            </div>
+            
+            <div id="rightSidebar" class="sidebar">
+                <sp-action-button
                     quiet
+                    .selected=${this.currentPanelTab === 'adjust'}
+                    @click="${this.handlePanelTabChange('adjust')}"
                 >
-                    <sp-tab label="Adjust" value="adjust"></sp-tab>
-                    <sp-tab label="Palette" value="palette"></sp-tab>
-                </sp-tabs>
+                    <sp-icon size="s" slot="icon">${GearsIcon()}</sp-icon>
+                </sp-action-button>
 
-                ${this.renderKnobs()} ${this.renderPalette()}
+                <sp-action-button
+                    quiet
+                    .selected=${this.currentPanelTab === 'palette'}
+                    @click="${this.handlePanelTabChange('palette')}"
+                >
+                    <sp-icon size="s" slot="icon">${ColorPaletteIcon()}</sp-icon>
+                </sp-action-button>
             </div>
 
             <sp-icons-medium></sp-icons-medium>
