@@ -171,3 +171,26 @@ export function hexToRgb(color: string, normalize: boolean = true): RGBAColor {
         d,
     ];
 }
+
+export function getFromPath(obj: object, path: string | Array<string>, defaultValue: any): any {
+    if (!Array.isArray(path)) path = path.split('.');
+
+    for(const node of path) {
+        if (!obj || !(node in obj)) return defaultValue;
+        obj = obj[node];
+    }
+
+
+    return obj;
+}
+
+export function throttle(fn: Function, delay: number = 1000) {
+    let timeoutRequest;
+    return (...args) => {
+        if (timeoutRequest) return;
+        timeoutRequest = setTimeout(() => {
+            timeoutRequest = null;
+            fn(...args);
+        }, delay);
+    }
+}

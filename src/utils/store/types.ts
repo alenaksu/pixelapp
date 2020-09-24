@@ -18,7 +18,7 @@ export interface StoreInterface {
     state: any;
     mutations: Map<string, MutationHandler>;
     actions: Map<string, ActionHandler>;
-    events: Map<string, StateEvent>;
+    events: Map<string, Array<string>>;
     emitter: EventEmitter;
     dispatch(action: string | Action, payload?: any);
     commit(mutation: string | Mutation, payload?: any);
@@ -35,5 +35,5 @@ export type StoreConfig<S> = {
     mutations?: { [name: string]: MutationHandler };
     initialState?: S;
     plugins?: Array<PluginHandler>;
-    events?: { [name: string]: StateEvent };
+    events?: { [name: string]: Array<string> };
 };
