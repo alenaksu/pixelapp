@@ -1,4 +1,5 @@
 import { LitElement, html, property, unsafeCSS } from 'lit-element';
+import { getFromPath } from '../../../utils';
 
 const LightControls = [
     { name: 'light.exposure', min: -1, max: 1, defaultValue: 0, label: 'Exposure', step: 0.01 },
@@ -57,7 +58,7 @@ const Slider = ({ name, handleChange, min, max, step, value, variant = 'filled',
         min="${min}"
         max="${max}"
         step="${step}"
-        value="${value}"
+        .value="${value}"
         variant="${variant}"
         label="${label}"
     ></sp-slider>
@@ -68,6 +69,8 @@ class EditPanel extends LitElement {
     params = {};
 
     render() {
+        const params = this.params;
+
         return html`
             <h3>Edit</h3>
             <sp-rule size="medium"></sp-rule>
@@ -78,7 +81,7 @@ class EditPanel extends LitElement {
                         ${LightControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
                     </sp-accordion-item>
 
@@ -86,7 +89,7 @@ class EditPanel extends LitElement {
                         ${ColorControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
                     </sp-accordion-item>
 
@@ -95,14 +98,14 @@ class EditPanel extends LitElement {
                         ${BlurControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
 
                         <h4>Sharpen</h3>
                         ${SharpenControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
                     </sp-accordion-item>
 
@@ -111,7 +114,7 @@ class EditPanel extends LitElement {
                         ${EdgeDetectionControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
 
                         <p>
@@ -122,7 +125,7 @@ class EditPanel extends LitElement {
                         ${DitherControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
 
                         <p>
@@ -131,7 +134,7 @@ class EditPanel extends LitElement {
                         ${EffectsControls.map(control => Slider({
                             ...control,
                             handleChange: null,
-                            value: control.defaultValue
+                            value: getFromPath(params, control.name, control.defaultValue)
                         }))}
                     </sp-accordion-item>
                 </sp-accordion>

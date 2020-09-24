@@ -26,12 +26,14 @@ const objToMap = (obj: any, map: Map<any, any>) => {
     for (const key in obj) map.set(key, obj[key]);
 };
 
+export const clone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
 export class Store<S = any> implements StoreInterface {
     readonly mutations: Map<string, MutationHandler> = new Map();
     readonly actions: Map<string, ActionHandler> = new Map();
-    readonly events: Map<string, StateEvent> = new Map();
+    readonly events: Map<string, Array<string>> = new Map();
     readonly emitter = createEventEmitter();
-    private updatePending = false;
+    private eventsPending = false;
 
     state: S = {} as S;
 
@@ -40,25 +42,23 @@ export class Store<S = any> implements StoreInterface {
         objToMap(config.actions, this.actions);
         objToMap(config.events, this.events);
 
-        this.state = Object.freeze({ ...config.initialState });
+        this.state = Object.freeze(clone(config.initialState));
 
         if (config.plugins) config.plugins!.forEach((plugin) => plugin(this));
     }
 
-    requestUpdate(state, prevState) {
-        if (this.updatePending) return;
+    triggerEvents(mutation) {
+        if (this.eventsPending) return;
 
-        this.updatePending = true;
+        this.eventsPending = true;
         queueMicrotask(() => {
-            this.emitter.emit(UPDATE_EVENT, { state, prevState });
-            this.events.forEach((event, name) => {
-                const prevValue = event.reducer(prevState);
-                const value = event.reducer(state);
-        
-                if (!event.compare(prevValue, value))
-                    this.emitter.emit(name, { value, prevValue });
+            this.emitter.emit(UPDATE_EVENT, mutation);
+            this.events.forEach((events, names) => {
+                if (~events.indexOf(mutation.type)) {
+                    this.emitter.emit(names, mutation);
+                }
             });
-            this.updatePending = false;
+            this.eventsPending = false;
         });
     }
 
@@ -67,9 +67,6 @@ export class Store<S = any> implements StoreInterface {
 
     dispatch = normalizeEvent((action: Action) => {
         const actions = this.actions;
-        const prevState = this.state;
-
-        this.state = { ...prevState };
 
         if (actions.has(action.type))
             actions.get(action.type)!(this, action.data);
@@ -79,12 +76,11 @@ export class Store<S = any> implements StoreInterface {
         const prevState = this.state;
         const mutations = this.mutations;
 
-        this.state = { ...prevState };
         if (mutations.has(mutation.type)) {
+            this.state = { ...prevState };
             mutations.get(mutation.type)!(this.state, mutation.data);
+            this.triggerEvents(mutation);
         }
-
-        this.requestUpdate(this.state, prevState);
     });
 }
 

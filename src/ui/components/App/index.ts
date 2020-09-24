@@ -7,7 +7,8 @@ import {
     MoveLeftRightIcon,
     FolderOpenIcon,
     GearsIcon,
-    ColorPaletteIcon
+    ColorPaletteIcon,
+    RedoIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
 import { create, Renderer } from '../../../renderer';
@@ -33,9 +34,6 @@ class App extends LitElement {
 
     private renderer: Renderer;
 
-    @property({ type: Object, attribute: false })
-    private knobs: object = {};
-
     @property({ type: Boolean })
     imageComparison: boolean = false;
 
@@ -52,14 +50,23 @@ class App extends LitElement {
         store.on('editParamsChanged', () => {
             this.renderer.filters.light.parameters = store.state.editParams.light;
             this.renderer.filters.color.parameters = store.state.editParams.color;
-            this.renderer.filters.edgeDetection.parameters = store.state.editParams.effects.edgeDetection;
-            this.renderer.filters.pixelate.parameters.pixelSize = store.state.editParams.effects.pixelate;
+            this.renderer.filters.edgeDetection.parameters =
+                store.state.editParams.effects.edgeDetection;
+            this.renderer.filters.pixelate.parameters.pixelSize =
+                store.state.editParams.effects.pixelate;
             this.renderer.filters.unsharpMask.parameters = store.state.editParams.detail.sharpen;
-            this.renderer.filters.dither.parameters.threshold = store.state.editParams.effects.dither.threshold;
-            this.renderer.filters.dither.parameters.size = store.state.editParams.effects.dither.size;
-            this.renderer.filters.blur.parameters.radius = store.state.editParams.detail.blur.radius;
+            this.renderer.filters.dither.parameters.threshold =
+                store.state.editParams.effects.dither.threshold;
+            this.renderer.filters.dither.parameters.size =
+                store.state.editParams.effects.dither.size;
+            this.renderer.filters.blur.parameters.radius =
+                store.state.editParams.detail.blur.radius;
             this.renderer.filters.blur.pass = store.state.editParams.detail.blur.pass * 2;
             this.renderer.draw();
+        });
+
+        store.on('updateui', () => {
+            this.requestUpdate();
         });
     }
 
@@ -144,7 +151,10 @@ class App extends LitElement {
             (<any>this.renderer.filters).palette.setPalette(null);
         }
 
-        store.setEditParam({name: 'effects.dither.threshold', value: palette ? 1 / palette.length : 0 });
+        store.setEditParam({
+            name: 'effects.dither.threshold',
+            value: palette ? 1 / palette.length : 0,
+        });
     }
 
     update(changedProperties) {
@@ -161,12 +171,6 @@ class App extends LitElement {
         }
     }
 
-    handleResetFiltersClick() {
-        // for (const knob of FilterKnobs) {
-        //     this.setKnob(knob.name, knob.value);
-        // }
-    }
-
     toggleImageComparison() {
         this.imageComparison = !this.imageComparison;
     }
@@ -174,26 +178,35 @@ class App extends LitElement {
     handleParamsChange(e) {
         const slider = e.composedPath()[0];
         store.setEditParam({
-            name: slider.getAttribute('name'), value: slider.value
-        })
+            name: slider.getAttribute('name'),
+            value: slider.value,
+        });
+        store.saveSnapshot();
     }
 
     renderEditPanel() {
         return html`
-            <pis-edit-panel @input="${this.handleParamsChange}" .hidden=${this.currentPanelTab !== 'adjust'}></pis-edit-panel>
+            <pis-edit-panel
+                @input="${this.handleParamsChange}"
+                .hidden=${this.currentPanelTab !== 'adjust'}
+                .params=${store.state.editParams}
+            ></pis-edit-panel>
         `;
     }
 
     renderPalette() {
         return html`
-            <pis-palette-panel @change="${this.handlePaletteChange}" .hidden=${this.currentPanelTab !== 'palette'}>
+            <pis-palette-panel
+                @change="${this.handlePaletteChange}"
+                .hidden=${this.currentPanelTab !== 'palette'}
+            >
             </pis-palette-panel>
         `;
     }
 
     handlePanelTabChange = (tabName: string) => () => {
         this.currentPanelTab = tabName;
-    }
+    };
 
     render() {
         return html`
@@ -216,19 +229,22 @@ class App extends LitElement {
                     </sp-menu>
                 </sp-action-menu>
 
-                <sp-action-button quiet @click="${this.handleResetFiltersClick}">
-                    <sp-icon size="s" slot="icon">${UndoIcon()}</sp-icon>
-                </sp-action-button>
-
                 <sp-rule size="small"></sp-rule>
 
                 <sp-action-button
+                    .disabled="${!store.state.history.canUndo}"
                     quiet
-                    toggles
-                    .selected=${this.imageComparison}
-                    @click="${this.toggleImageComparison}"
+                    @click="${store.undo}"
                 >
-                    <sp-icon size="s" slot="icon">${MoveLeftRightIcon()}</sp-icon>
+                    <sp-icon size="s" slot="icon">${UndoIcon()}</sp-icon>
+                </sp-action-button>
+
+                <sp-action-button
+                    .disabled="${!store.state.history.canRedo}"
+                    quiet
+                    @click="${store.redo}"
+                >
+                    <sp-icon size="s" slot="icon">${RedoIcon()}</sp-icon>
                 </sp-action-button>
             </div>
 
@@ -242,7 +258,7 @@ class App extends LitElement {
             <div id="rightPanel" class="scrollable">
                 ${this.renderEditPanel()} ${this.renderPalette()}
             </div>
-            
+
             <div id="rightSidebar" class="sidebar">
                 <sp-action-button
                     quiet
@@ -258,6 +274,15 @@ class App extends LitElement {
                     @click="${this.handlePanelTabChange('palette')}"
                 >
                     <sp-icon size="s" slot="icon">${ColorPaletteIcon()}</sp-icon>
+                </sp-action-button>
+
+                <sp-action-button
+                    quiet
+                    toggles
+                    .selected=${this.imageComparison}
+                    @click="${this.toggleImageComparison}"
+                >
+                    <sp-icon size="s" slot="icon">${MoveLeftRightIcon()}</sp-icon>
                 </sp-action-button>
             </div>
 
