@@ -6,6 +6,7 @@ const consolePlugin = (store: Store) => store.on('@@update', console.log);
 const editParams = {
     light: {
         exposure: 0,
+        brightness: 0,
         contrast: 0,
         highlights: 0,
         shadows: 0,
