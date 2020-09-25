@@ -3,7 +3,7 @@ import { getFromPath } from '../../../utils';
 
 const LightControls = [
     { name: 'light.exposure', min: -1, max: 1, defaultValue: 0, label: 'Exposure', step: 0.01 },
-    { name: 'light.brightness', min: -1, max: 1, defaultValue: 0, label: 'brightness', step: 0.01 },
+    { name: 'light.brightness', min: -1, max: 1, defaultValue: 0, label: 'Brightness', step: 0.01 },
     { name: 'light.contrast', min: -1, max: 1, defaultValue: 0, label: 'Contrast', step: 0.01 },
     { name: 'light.highlights', min: -1, max: 1, defaultValue: 0, label: 'Highlights', step: 0.01 },
     { name: 'light.shadows', min: -1, max: 1, defaultValue: 0, label: 'Shadows', step: 0.01 },
