@@ -6,6 +6,7 @@ varying vec2 texCoord;
 uniform sampler2D image;
 uniform vec2 resolution;
 uniform float exposure;
+uniform float brightness;
 uniform float contrast;
 uniform float highlights;
 uniform float shadows;
@@ -15,7 +16,7 @@ uniform float blacks;
 const float PI = 3.1415926535897932384626433832795;
 
 float luma(vec4 color) {
-    return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.722;
+    return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
 }
 
 vec4 blur() {
@@ -76,6 +77,9 @@ void main() {
     // Contrast
     float slant = tan((contrast / 2.0 + 1.0) * (PI / 4.0));
     color.rgb = (color.rgb - 0.5) * slant + 0.5;
+
+    // Brightness
+    color.rgb += brightness;
 
     // Highlights / Shadows
     float luminance = luma(color);
