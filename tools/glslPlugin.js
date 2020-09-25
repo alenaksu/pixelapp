@@ -1,11 +1,11 @@
 const fs = require('fs/promises');
-const glsl = require('glslify')
+const glsl = require('glslify');
 
 module.exports = function (snowpackConfig, options = {}) {
     return {
         name: 'glsl-plugin',
         resolve: {
-            input: ['.frag'],
+            input: ['.frag', '.vert', '.glsl'],
             output: ['.js'],
         },
         async load({ filePath }) {

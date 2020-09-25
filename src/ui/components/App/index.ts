@@ -11,7 +11,7 @@ import {
     RedoIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
-import { create, Renderer } from '../../../renderer';
+import { createEditor, Renderer } from '../../../renderer';
 import { loadImage, openFile } from '../../../utils';
 import { MimeTypes } from '../../../types';
 import store from '../../../store';
@@ -19,6 +19,7 @@ import store from '../../../store';
 import '../PalettePanel';
 import '../ImageComparison';
 import '../EditPanel';
+import '../Histogram';
 
 class App extends LitElement {
     @query('#canvas')
@@ -31,6 +32,9 @@ class App extends LitElement {
 
     @query('pis-palette-panel')
     private palettePanel;
+
+    @query('#histogram')
+    private histogram;
 
     private renderer: Renderer;
 
@@ -45,7 +49,7 @@ class App extends LitElement {
     }
 
     firstUpdated() {
-        this.renderer = create(this.canvas);
+        this.renderer = createEditor(this.canvas);
 
         store.on('editParamsChanged', () => {
             this.renderer.filters.light.parameters = store.state.editParams.light;
@@ -63,6 +67,7 @@ class App extends LitElement {
                 store.state.editParams.detail.blur.radius;
             this.renderer.filters.blur.pass = store.state.editParams.detail.blur.pass * 2;
             this.renderer.draw();
+            this.histogram.draw(this.canvas);
         });
 
         store.on('updateui', () => {
@@ -166,6 +171,7 @@ class App extends LitElement {
         ) {
             loadImage(this.imageSrc).then((image: ImageData) => {
                 this.renderer.setSource(image);
+                this.histogram.draw(this.renderer.canvas);
                 this.palettePanel.editor.image = image;
             });
         }
@@ -256,6 +262,7 @@ class App extends LitElement {
             </div>
 
             <div id="rightPanel" class="scrollable">
+                <pis-histogram id="histogram"></pis-histogram>
                 ${this.renderEditPanel()} ${this.renderPalette()}
             </div>
 

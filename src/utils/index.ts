@@ -1,5 +1,8 @@
 import { RGBAColor, MimeTypes } from '../types';
 
+export * from './events';
+export * from './webgl';
+
 export function getPixel(
     x: number,
     y: number,
@@ -51,7 +54,7 @@ export function getPixelMatrix(offset: number, size: number, imageData: ImageDat
 }
 
 export function luma(color) {
-    return color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.722;
+    return color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.0722;
 }
 
 export function loadImage(imageSrc: string, maxSize: number = 1024) {
@@ -182,6 +185,20 @@ export function getFromPath(obj: object, path: string | Array<string>, defaultVa
 
 
     return obj;
+}
+
+export default function rafThrottle(fn: Function) {
+    let rafRequest;
+    let lastArgs;
+    return (...args)  => {
+        lastArgs = args;
+
+        if (rafRequest) return;
+        rafRequest = requestAnimationFrame(() => {
+            fn(...lastArgs);
+            rafRequest = null;
+        });
+    }
 }
 
 export function throttle(fn: Function, delay: number = 1000) {

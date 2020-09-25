@@ -1,4 +1,4 @@
-import { createShader, createProgram } from './utils';
+import { createShader, createProgram, setUniforms, setAttribArray } from '../utils';
 
 export default class Filter {
     program: WebGLProgram;
@@ -56,61 +56,11 @@ export default class Filter {
 
         const allUniforms = {
             ...parameters,
+            resolution: [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight]
         };
 
-        for (const name in allUniforms) {
-            const location = gl.getUniformLocation(program, name);
-            if (location === null) continue; // will be null if the uniform isn't used in the shader
-
-            const value = allUniforms[name];
-            if (Array.isArray(value)) {
-                const array = new Float32Array(value);
-                switch (value.length) {
-                    case 1:
-                        gl.uniform1fv(location, array);
-                        break;
-                    case 2:
-                        gl.uniform2fv(location, array);
-                        break;
-                    case 3:
-                        gl.uniform3fv(location, array);
-                        break;
-                    case 4:
-                        gl.uniform4fv(location, array);
-                        break;
-                    case 9:
-                        gl.uniformMatrix3fv(location, false, array);
-                        break;
-                    case 16:
-                        gl.uniformMatrix4fv(location, false, array);
-                        break;
-                    default:
-                        gl.uniform1fv(location, array);
-                    // throw (
-                    //     'dont\'t know how to load uniform "' +
-                    //     name +
-                    //     '" of length ' +
-                    //     value.length
-                    // );
-                }
-            } else if (typeof value === 'number') {
-                gl.uniform1f(location, value);
-            } else {
-                throw (
-                    'attempted to set uniform "' +
-                    name +
-                    '" to invalid value ' +
-                    (value || 'undefined').toString()
-                );
-            }
-        }
-
-        const positionLocation = gl.getAttribLocation(program, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-        const resolutionLocation = gl.getUniformLocation(program, 'resolution');
-        gl.uniform2fv(resolutionLocation,  [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight]);
+        setUniforms(gl, allUniforms);
+        setAttribArray(gl, 'position', 2);
 
         // const passLocation = gl.getUniformLocation(program, 'pass');
         // gl.uniform1f(passLocation, i);
