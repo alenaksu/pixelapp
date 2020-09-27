@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - 'docs/**'
   pull_request:
-    branches: [ master ]
+    branches: [ ]
 
 jobs:
   build:
