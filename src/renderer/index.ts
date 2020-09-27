@@ -1,4 +1,5 @@
-import { createTexture, createFramebuffer } from './utils';
+import rafThrottle, { createTexture, createFramebuffer, createPlane } from '../utils';
+
 import Filter from './Filter';
 import Light from './filters/Light';
 import Color from './filters/Color';
@@ -20,9 +21,13 @@ export class Renderer {
     gl: WebGLRenderingContext;
     filters: FiltersArray = <FiltersArray>[];
     debug: boolean = true;
+    frameBuffers: [any, any];
 
     constructor(public canvas: HTMLCanvasElement) {
-        const gl: WebGLRenderingContext = canvas.getContext('webgl', { antialias: false });
+        const gl: WebGLRenderingContext = canvas.getContext('webgl', {
+            antialias: false,
+            preserveDrawingBuffer: true,
+        });
 
         if (!gl) throw new Error('WebGL is not available');
 
@@ -30,22 +35,7 @@ export class Renderer {
 
         const positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-        const planeCoords = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(planeCoords), gl.STATIC_DRAW);
-
-        this.registerFilter(Filter);
-        // this.registerFilter(Posterize);
-        this.registerFilter(Light);
-        this.registerFilter(Color);
-        // Detail?
-        this.registerFilter(Blur);
-        this.registerFilter(UnsharpMask);
-        this.registerFilter(EdgeDetection);
-        this.registerFilter(Pixelate);
-        this.registerFilter(Dither);
-        this.registerFilter(Palette);
-        this.registerFilter(FlipY);
+        gl.bufferData(gl.ARRAY_BUFFER, createPlane(), gl.STATIC_DRAW);
     }
 
     registerFilter(FilterClass: typeof Filter) {
@@ -85,17 +75,14 @@ export class Renderer {
         gl.activeTexture(gl.TEXTURE0);
     }
 
-    draw() {
-        const { gl, source, filters, debug } = this;
+    draw = rafThrottle(() => {
+        console.time('renderer::draw');
+        
+        const { gl, source, filters, debug, frameBuffers } = this;
 
         if (!source) return;
 
         this.clear(gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-        let frameBuffers = [
-            createFramebuffer(gl, source.width, source.height),
-            createFramebuffer(gl, source.width, source.height),
-        ];
 
         this.drawSource();
 
@@ -143,22 +130,48 @@ export class Renderer {
         // gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-        for (const fb of frameBuffers) {
-            gl.deleteFramebuffer(fb.buffer);
-            gl.deleteTexture(fb.texture);
-        }
-    }
+        console.timeEnd('renderer::draw');
+    });
 
     setSource(newSource: TexImageSource) {
+        const { gl, canvas, frameBuffers } = this;
+
         this.source = newSource;
 
-        this.canvas.width = newSource.width;
-        this.canvas.height = newSource.height;
+        canvas.width = newSource.width;
+        canvas.height = newSource.height;
+
+        if (frameBuffers) {
+            for (const fb of frameBuffers) {
+                gl.deleteFramebuffer(fb.buffer);
+                gl.deleteTexture(fb.texture);
+            }
+        }
+
+        this.frameBuffers = [
+            createFramebuffer(gl, newSource.width, newSource.height),
+            createFramebuffer(gl, newSource.width, newSource.height),
+        ];
 
         this.draw();
     }
 }
 
-export function create(canvas) {
-    return new Renderer(canvas);
+export function createEditor(canvas) {
+    const renderer = new Renderer(canvas);
+
+    renderer.registerFilter(Filter);
+    // renderer.registerFilter(Posterize);
+    renderer.registerFilter(Light);
+    renderer.registerFilter(Color);
+    // Detail?
+    renderer.registerFilter(Blur);
+    renderer.registerFilter(UnsharpMask);
+    renderer.registerFilter(EdgeDetection);
+    renderer.registerFilter(Pixelate);
+    renderer.registerFilter(Dither);
+    renderer.registerFilter(Palette);
+    renderer.registerFilter(FlipY);
+
+    return renderer;
 }

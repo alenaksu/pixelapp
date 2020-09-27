@@ -1,5 +1,5 @@
 import Filter from '../../Filter';
-import { createFramebuffer } from '../../utils';
+import { createFramebuffer } from '../../../utils';
 import fragment from './shader.frag';
 
 export default class Palette extends Filter {

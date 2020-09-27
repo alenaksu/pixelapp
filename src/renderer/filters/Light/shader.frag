@@ -15,7 +15,7 @@ uniform float blacks;
 const float PI = 3.1415926535897932384626433832795;
 
 float luma(vec4 color) {
-    return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+    return dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
 }
 
 vec4 blur() {
