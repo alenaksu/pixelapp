@@ -109,11 +109,11 @@ export function createTexture(
 
 export function setUniform(gl: WebGLRenderingContext, type: number, location: WebGLUniformLocation, value: any) {
     switch (type) {
-        case gl.FLOAT: return gl.uniform1f(location, value);
+        case gl.FLOAT: return (Array.isArray(value) ? gl.uniform1fv : gl.uniform1f).call(gl, location, value);
         case gl.FLOAT_VEC2: return gl.uniform2fv(location, value);
         case gl.FLOAT_VEC3: return gl.uniform3fv(location, value);
         case gl.FLOAT_VEC4: return gl.uniform4fv(location, value);
-        case gl.INT: return gl.uniform1i(location, value);
+        case gl.INT: return (Array.isArray(value) ? gl.uniform1iv : gl.uniform1i).call(gl, location, value);
         case gl.INT_VEC2: return gl.uniform2iv(location, value);
         case gl.INT_VEC3: return gl.uniform3iv(location, value);
         case gl.INT_VEC4: return gl.uniform4iv(location, value);
@@ -136,9 +136,10 @@ export function setUniforms(gl: WebGLRenderingContext, uniforms: object) {
     const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
     for (let i = 0; i < numUniforms; ++i) {
         const { name, type } = gl.getActiveUniform(program, i);
-        if (name in uniforms) {
-            const location = gl.getUniformLocation(program, name);
-            setUniform(gl, type, location, uniforms[name]);
+        const sanitizedName = name.replace('[0]', '');
+        if (sanitizedName in uniforms) {
+            const location = gl.getUniformLocation(program, sanitizedName);
+            setUniform(gl, type, location, uniforms[sanitizedName]);
         }
     }
 }
