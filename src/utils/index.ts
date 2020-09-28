@@ -178,11 +178,10 @@ export function hexToRgb(color: string, normalize: boolean = true): RGBAColor {
 export function getFromPath(obj: object, path: string | Array<string>, defaultValue: any): any {
     if (!Array.isArray(path)) path = path.split('.');
 
-    for(const node of path) {
+    for (const node of path) {
         if (!obj || !(node in obj)) return defaultValue;
         obj = obj[node];
     }
-
 
     return obj;
 }
@@ -190,7 +189,7 @@ export function getFromPath(obj: object, path: string | Array<string>, defaultVa
 export default function rafThrottle(fn: Function) {
     let rafRequest;
     let lastArgs;
-    return (...args)  => {
+    return (...args) => {
         lastArgs = args;
 
         if (rafRequest) return;
@@ -198,7 +197,7 @@ export default function rafThrottle(fn: Function) {
             fn(...lastArgs);
             rafRequest = null;
         });
-    }
+    };
 }
 
 export function throttle(fn: Function, delay: number = 1000) {
@@ -209,5 +208,25 @@ export function throttle(fn: Function, delay: number = 1000) {
             timeoutRequest = null;
             fn(...args);
         }, delay);
-    }
+    };
+}
+
+export function saveCanvas(canvas: HTMLCanvasElement, { name = 'image.jpg', quality = 80 } = {}) {
+    return new Promise((resolve) => {
+        canvas.toBlob(
+            (blob) => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'image.jpg';
+                a.click();
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(a.href);
+                    resolve();
+                });
+            },
+            'image/jpeg',
+            quality / 100,
+        );
+    });
 }

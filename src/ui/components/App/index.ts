@@ -9,10 +9,11 @@ import {
     GearsIcon,
     ColorPaletteIcon,
     RedoIcon,
+    SaveToLightIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
 import { createEditor, Renderer } from '../../../renderer';
-import { loadImage, openFile } from '../../../utils';
+import { loadImage, openFile, saveCanvas } from '../../../utils';
 import { MimeTypes } from '../../../types';
 import store from '../../../store';
 
@@ -20,6 +21,7 @@ import '../PalettePanel';
 import '../ImageComparison';
 import '../EditPanel';
 import '../Histogram';
+import '../SaveDialog';
 
 class App extends LitElement {
     @query('#canvas')
@@ -35,6 +37,9 @@ class App extends LitElement {
 
     @query('#histogram')
     private histogram;
+
+    @query('#saveDialog')
+    private saveDialog;
 
     private renderer: Renderer;
 
@@ -214,6 +219,16 @@ class App extends LitElement {
         this.currentPanelTab = tabName;
     };
 
+    handleSaveClick() {
+        this.saveDialog.open = true;
+    }
+
+    handleSaveFile({ detail: { quality } }) {
+        saveCanvas(this.canvas, {
+            quality
+        });
+    }
+
     render() {
         return html`
             <div id="menuBar"></div>
@@ -234,6 +249,10 @@ class App extends LitElement {
                         </sp-menu-item>
                     </sp-menu>
                 </sp-action-menu>
+
+                <sp-action-button quiet @click="${this.handleSaveClick}">
+                    <sp-icon size="s" slot="icon">${SaveToLightIcon()}</sp-icon>
+                </sp-action-button>
 
                 <sp-rule size="small"></sp-rule>
 
@@ -295,6 +314,8 @@ class App extends LitElement {
 
             <sp-icons-medium></sp-icons-medium>
             <sp-icons-workflow></sp-icons-workflow>
+
+            <pis-save-dialog id="saveDialog" @confirm="${this.handleSaveFile}"></pis-save-dialog>
         `;
     }
 }
