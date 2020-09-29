@@ -57,7 +57,7 @@ export function luma(color) {
     return color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.0722;
 }
 
-export function loadImage(imageSrc: string, maxSize: number = 1024) {
+export function loadImage(imageSrc: string, maxSize: number = 2048) {
     return new Promise((resolve) => {
         const image = new Image();
         image.onload = () => {

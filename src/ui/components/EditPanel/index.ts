@@ -1,8 +1,9 @@
 import { LitElement, html, property, unsafeCSS } from 'lit-element';
 import { getFromPath } from '../../../utils';
+import styles from './styles.css';
 
 const LightControls = [
-    { name: 'light.exposure', min: -1, max: 1, defaultValue: 0, label: 'Exposure', step: 0.01 },
+    { name: 'light.exposure', min: -5, max: 5, defaultValue: 0, label: 'Exposure', step: 0.01 },
     { name: 'light.brightness', min: -1, max: 1, defaultValue: 0, label: 'Brightness', step: 0.01 },
     { name: 'light.contrast', min: -1, max: 1, defaultValue: 0, label: 'Contrast', step: 0.01 },
     { name: 'light.highlights', min: -1, max: 1, defaultValue: 0, label: 'Highlights', step: 0.01 },
@@ -12,8 +13,9 @@ const LightControls = [
 ];
 
 const ColorControls = [
-    { name: 'color.temperature', min: -1, max: 1, defaultValue: 0, label: 'Temp', step: 0.01 },
-    { name: 'color.hue', min: -1, max: 1, defaultValue: 0, label: 'Tint', step: 0.01 },
+    { name: 'color.temperature', min: -1, max: 1, defaultValue: 0, label: 'Temp', step: 0.01, variant: '' },
+    { name: 'color.tint', min: -1, max: 1, defaultValue: 0, label: 'Tint', step: 0.01, variant: '' },
+    { name: 'color.hue', min: -1, max: 1, defaultValue: 0, label: 'Hue', step: 0.01, variant: '' },
     { name: 'color.vibrance', min: -1, max: 1, defaultValue: 0, label: 'Vibrance', step: 0.01 },
     { name: 'color.saturation', min: -1, max: 1, defaultValue: 0, label: 'Saturation', step: 0.01 }
 ];
@@ -24,7 +26,7 @@ const SharpenControls = [
 ];
 
 const BlurControls = [
-    { name: 'detail.blur.radius', min: 0, max: 5, defaultValue: 0, label: 'Radius', step: 0.01 },
+    { name: 'detail.blur.radius', min: 0, max: 5, defaultValue: 0, label: 'Radius', step: 1 },
     { name: 'detail.blur.pass', min: 0, max: 10, defaultValue: 1, label: 'Pass', step: 1 },
 ];
 
@@ -52,7 +54,7 @@ const DitherControls = [
     },
 ];
 
-const Slider = ({ name, handleChange, min, max, step, value, variant = 'filled', label }) => html`
+const Slider = ({ name, handleChange, min, max, step, value, variant = '', label }) => html`
     <sp-slider
         @input=${handleChange}
         name="${name}"
@@ -68,6 +70,10 @@ const Slider = ({ name, handleChange, min, max, step, value, variant = 'filled',
 class EditPanel extends LitElement {
     @property({ type: Object, attribute: false })
     params = {};
+
+    static get styles() {
+        return unsafeCSS(styles);
+    }
 
     render() {
         const params = this.params;

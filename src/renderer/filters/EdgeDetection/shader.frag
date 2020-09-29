@@ -7,6 +7,8 @@ uniform float radius;
 uniform float threshold;
 uniform float blend;
 
+const float PI = 3.1415926535897932384626433832795;
+
 float convolute(mat3 kernel, sampler2D image, vec2 pos)
 {
     vec4 tex00 = texture2D(image, pos + vec2(-1, -1) * resolution * radius) * kernel[0][0];
@@ -30,7 +32,11 @@ float convolute(mat3 kernel, sampler2D image, vec2 pos)
     return (color.r + color.g + color.b) / 3.0;
 }
 
-float sobel(sampler2D image, vec2 pos)
+float roundToN(float x, float n) {
+    return floor(x / n + 0.5) * n;
+}
+
+vec2 sobel(sampler2D image, vec2 pos)
 {
     mat3 kernelX = mat3(
         47.0, 0.0, -47.0,
@@ -45,12 +51,43 @@ float sobel(sampler2D image, vec2 pos)
     float gx = convolute(kernelX, image, pos);
     float gy = convolute(kernelY, image, pos);
 
-    return sqrt(pow(gx, 2.0) + pow(gy, 2.0));
+    float magnitude = length(vec2(gx, gy));
+    float direction = atan(gy, gx);
+
+    return vec2(magnitude, direction);
+}
+
+float nonMaximumSuppression(vec2 center) {
+    float theta = mod(roundToN(center.y, PI / 4.0), PI);
+    vec2 edge0;
+    vec2 edge1;
+
+    if (theta == 0.0) {
+        // e-w
+        edge0 = sobel(source, texCoord + vec2(-resolution.x, 0.0));
+        edge1 = sobel(source, texCoord + vec2(resolution.x, 0.0));
+    } else if (theta == PI / 4.0) {
+        // ne-sw
+        edge0 = sobel(source, texCoord + vec2(resolution.x, -resolution.y));
+        edge1 = sobel(source, texCoord + vec2(-resolution.x, resolution.y));
+    } else if (theta == PI / 2.0) {
+        // n-s
+        edge0 = sobel(source, texCoord + vec2(0.0, -resolution.y));
+        edge1 = sobel(source, texCoord + vec2(0.0, resolution.y));
+    } else if (theta == (3.0 * PI) / 4.0) {
+        // nw-se
+        edge0 = sobel(source, texCoord + vec2(-resolution.x, -resolution.y));
+        edge1 = sobel(source, texCoord + vec2(resolution.x, resolution.y));
+    }
+
+    return center.x >= max(edge0.x, edge1.x) ? center.x : 0.0;
 }
 
 void main() {
-    float magnitude = sobel(source, texCoord);
+    vec2 center = sobel(source, texCoord);
 
-    gl_FragColor = texture2D(image, texCoord) * (magnitude > threshold ? (blend + 1.0) : 1.0);
+    // float x = nonMaximumSuppression(center);
+
+    gl_FragColor = texture2D(image, texCoord) * (center.x > threshold ? (blend + 1.0) : 1.0);
     gl_FragColor.a = 1.0;
 }

@@ -6,7 +6,7 @@ import {
     UndoIcon,
     MoveLeftRightIcon,
     FolderOpenIcon,
-    GearsIcon,
+    PropertiesIcon,
     ColorPaletteIcon,
     RedoIcon,
     SaveToLightIcon,
@@ -291,7 +291,7 @@ class App extends LitElement {
                     .selected=${this.currentPanelTab === 'adjust'}
                     @click="${this.handlePanelTabChange('adjust')}"
                 >
-                    <sp-icon size="s" slot="icon">${GearsIcon()}</sp-icon>
+                    <sp-icon size="s" slot="icon">${PropertiesIcon()}</sp-icon>
                 </sp-action-button>
 
                 <sp-action-button

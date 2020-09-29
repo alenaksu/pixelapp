@@ -25,8 +25,8 @@ const editParams = {
             radius: 3,
         },
         blur: {
-            radius: 0,
-            pass: 1,
+            radius: 1,
+            pass: 0,
         },
     },
     effects: {
