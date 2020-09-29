@@ -1,1 +1,1 @@
-import t from"../../Filter.js";import e from"./shader.js";export default class a extends t{constructor(...r){super(...r);this.name="color",this.parameters={temperature:0,hue:0,vibrance:0,saturation:0}}static get fragmentShader(){return e}}
+import t from"../../Filter.js";import e from"./shader.js";export default class a extends t{constructor(...r){super(...r);this.name="color",this.parameters={temperature:0,tint:0,hue:0,vibrance:0,saturation:0}}static get fragmentShader(){return e}}

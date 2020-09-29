@@ -6,6 +6,7 @@ varying vec2 texCoord;
 uniform sampler2D image;
 uniform float saturation;
 uniform float temperature;
+uniform float tint;
 uniform float hue;
 uniform float vibrance;
 
@@ -18,7 +19,14 @@ void main() {
     // Temperature
     float t = temperature / 4.0;
     color.r += t;
+    // color.g += t;
     color.b -= t;
+
+    // Tint
+    t = tint / 4.0;
+    // color.r += t;
+    color.g -= t;
+    // color.b += t;
 
     // Hue - Rotate color cube along {1,1,1} vector (Wolframe alpha: RotationTransform[theta, {1, 1, 1}][{x, y, z}])
     float theta = hue * PI;
