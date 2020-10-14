@@ -3,6 +3,7 @@
     position: relative;
     --thumb-size: 50px;
     --separator-size: 4px;
+    contain: content;
 }
 
 .image {
@@ -24,6 +25,7 @@
     position: absolute;
     right: 0;
     top: 0;
+    z-index: -1;
 }
 
 .separator {

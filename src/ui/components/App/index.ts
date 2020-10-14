@@ -10,23 +10,25 @@ import {
     ColorPaletteIcon,
     RedoIcon,
     SaveToLightIcon,
+    CropRotateIcon,
+    DeleteIcon,
 } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
 import { createEditor, Renderer } from '../../../renderer';
-import { loadImage, openFile, saveCanvas } from '../../../utils';
+import { rafThrottle, loadImage, openFile, saveImage } from '../../../utils';
 import { MimeTypes } from '../../../types';
 import store from '../../../store';
 
-import '../PalettePanel';
+import '../panels/PalettePanel';
 import '../ImageComparison';
-import '../EditPanel';
+import '../panels/EditPanel';
 import '../Histogram';
 import '../SaveDialog';
+import '../CropTool';
+import '../panels/CropPanel';
+import '../SourceImage';
 
 class App extends LitElement {
-    @query('#canvas')
-    canvas?: HTMLCanvasElement;
-
     @property({ type: String, attribute: 'image-src' })
     private imageSrc: string = '';
 
@@ -41,39 +43,45 @@ class App extends LitElement {
     @query('#saveDialog')
     private saveDialog;
 
-    private renderer: Renderer;
+    private renderer: Renderer = createEditor();
 
     @property({ type: Boolean })
     imageComparison: boolean = false;
 
     @property({ type: String })
-    private currentPanelTab: string = 'adjust';
+    private activeTool: string = 'adjust';
+
+    @property({ type: Boolean, attribute: false })
+    private loading: boolean = false;
 
     static get styles() {
         return unsafeCSS(styles);
     }
 
     firstUpdated() {
-        this.renderer = createEditor(this.canvas);
-
-        store.on('editParamsChanged', () => {
-            this.renderer.filters.light.parameters = store.state.editParams.light;
-            this.renderer.filters.color.parameters = store.state.editParams.color;
-            this.renderer.filters.edgeDetection.parameters =
-                store.state.editParams.effects.edgeDetection;
-            this.renderer.filters.pixelate.parameters.pixelSize =
-                store.state.editParams.effects.pixelate;
-            this.renderer.filters.unsharpMask.parameters = store.state.editParams.detail.sharpen;
-            this.renderer.filters.dither.parameters.threshold =
-                store.state.editParams.effects.dither.threshold;
-            this.renderer.filters.dither.parameters.size =
-                store.state.editParams.effects.dither.size;
-            this.renderer.filters.blur.parameters.radius =
-                store.state.editParams.detail.blur.radius;
-            this.renderer.filters.blur.pass = store.state.editParams.detail.blur.pass * 2;
-            this.renderer.draw();
-            this.histogram.draw(this.canvas);
-        });
+        store.on(
+            'editParamsChanged',
+            rafThrottle(() => {
+                this.renderer.filters.crop.parameters = store.state.editParams.crop;
+                this.renderer.filters.light.parameters = store.state.editParams.light;
+                this.renderer.filters.color.parameters = store.state.editParams.color;
+                this.renderer.filters.edgeDetection.parameters =
+                    store.state.editParams.effects.edgeDetection;
+                this.renderer.filters.pixelate.parameters.pixelSize =
+                    store.state.editParams.effects.pixelate;
+                this.renderer.filters.unsharpMask.parameters =
+                    store.state.editParams.detail.sharpen;
+                this.renderer.filters.dither.parameters.threshold =
+                    store.state.editParams.effects.dither.threshold;
+                this.renderer.filters.dither.parameters.size =
+                    store.state.editParams.effects.dither.size;
+                this.renderer.filters.blur.parameters.radius =
+                    store.state.editParams.detail.blur.radius;
+                this.renderer.filters.blur.pass = store.state.editParams.detail.blur.pass * 2;
+                this.renderer.draw();
+                this.histogram.draw(this.renderer.canvas);
+            }),
+        );
 
         store.on('updateui', () => {
             this.requestUpdate();
@@ -91,69 +99,20 @@ class App extends LitElement {
         }
         this.video = null;
         this.imageSrc = null;
+
+        store.resetEditParams();
     }
 
     handleOpenImage() {
-        this.clear();
-
         openFile().then((file) => {
+            this.clear();
             this.imageSrc = URL.createObjectURL(file);
-        });
-    }
-
-    // TODO sistemare
-    handleOpenCamera() {
-        this.clear();
-
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-            const video = (this.video = document.createElement('video'));
-
-            video.srcObject = stream;
-            video.play().then(() => {
-                video.width = video.videoWidth;
-                video.height = video.videoHeight;
-
-                this.renderer.setSource(video);
-
-                const update = () => {
-                    this.renderer.draw();
-                    this.video && requestAnimationFrame(update);
-                };
-
-                requestAnimationFrame(update);
-            });
-        }, console.error);
-    }
-
-    // TODO sistemare
-    handleOpenVideo() {
-        this.clear();
-
-        openFile(MimeTypes.Video).then((file) => {
-            const video = (this.video = document.createElement('video'));
-            video.src = URL.createObjectURL(file);
-
-            video.play().then(() => {
-                video.width = video.videoWidth;
-                video.height = video.videoHeight;
-
-                this.renderer.setSource(video);
-
-                const update = () => {
-                    this.renderer.draw();
-                    this.video && requestAnimationFrame(update);
-                };
-
-                requestAnimationFrame(update);
-            });
-            video.onended = video.play.bind(video);
         });
     }
 
     handlePaletteChange() {
         const palette = this.palettePanel.editor.palette;
         if (palette && palette.length) {
-            console.log(new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1));
             (<any>this.renderer.filters).palette.setPalette(
                 new ImageData(new Uint8ClampedArray(palette.flat()), palette.length, 1),
             );
@@ -170,16 +129,20 @@ class App extends LitElement {
     update(changedProperties) {
         super.update(changedProperties);
 
-        if (
-            changedProperties.has('imageSrc') &&
-            changedProperties.get('imageSrc') !== this.imageSrc
-        ) {
-            loadImage(this.imageSrc).then((image: ImageData) => {
-                this.renderer.setSource(image);
-                this.histogram.draw(this.renderer.canvas);
-                this.palettePanel.editor.image = image;
-            });
+        if (changedProperties.has('imageSrc') && this.imageSrc) {
+            this.loadPreview();
         }
+    }
+
+    loadPreview() {
+        this.loading = true;
+        loadImage(this.imageSrc, 1980).then((image: ImageData) => {
+            store.setImageData(image);
+            this.renderer.setSource(image);
+            this.histogram.draw(this.renderer.canvas);
+            // this.palettePanel.editor.image = image;
+            this.loading = false;
+        });
     }
 
     toggleImageComparison() {
@@ -195,11 +158,23 @@ class App extends LitElement {
         store.saveSnapshot();
     }
 
+    renderCropPanel() {
+        return html`
+            <pis-crop-panel
+                @input="${this.handleParamsChange}"
+                @change="${this.handleParamsChange}"
+                .hidden=${this.activeTool !== 'crop'}
+                .params=${store.state.editParams}
+            ></pis-crop-panel>
+        `;
+    }
+
     renderEditPanel() {
         return html`
             <pis-edit-panel
                 @input="${this.handleParamsChange}"
-                .hidden=${this.currentPanelTab !== 'adjust'}
+                @change="${this.handleParamsChange}"
+                .hidden=${this.activeTool !== 'adjust'}
                 .params=${store.state.editParams}
             ></pis-edit-panel>
         `;
@@ -209,24 +184,72 @@ class App extends LitElement {
         return html`
             <pis-palette-panel
                 @change="${this.handlePaletteChange}"
-                .hidden=${this.currentPanelTab !== 'palette'}
+                .hidden=${this.activeTool !== 'palette'}
             >
             </pis-palette-panel>
         `;
     }
 
+    renderPanel() {
+        switch (this.activeTool) {
+            case 'adjust':
+                return this.renderEditPanel();
+            case 'crop':
+                return this.renderCropPanel();
+            case 'palette':
+                return this.renderPalette();
+        }
+    }
+
     handlePanelTabChange = (tabName: string) => () => {
-        this.currentPanelTab = tabName;
+        this.activeTool = tabName;
     };
 
     handleSaveClick() {
         this.saveDialog.open = true;
     }
 
-    handleSaveFile({ detail: { quality } }) {
-        saveCanvas(this.canvas, {
-            quality
+    async handleSaveFile({ detail: { quality } }) {
+        this.loading = true;
+
+        const image = await loadImage(this.imageSrc);
+
+        store.setImageData(image);
+        this.renderer.setSource(image);
+        this.renderer.draw();
+
+        await saveImage(this.renderer.canvas, {
+            quality,
         });
+
+        this.loadPreview();
+
+        this.loading = false;
+    }
+
+    handleResetChanges() {
+        store.resetEditParams();
+    }
+
+    renderActiveTool() {
+        this.renderer.canvas.slot = 'modified';
+
+        switch (this.activeTool) {
+            case 'crop':
+                return html`
+                    <pis-crop-tool>
+                        <img slot="original" is="pis-source-image" src="${this.imageSrc}" />
+                        ${this.renderer.canvas}
+                    </pis-crop-tool>
+                `;
+            default:
+                return html`
+                    <pis-image-comparison .enable="${this.imageComparison}">
+                        <img slot="original" is="pis-source-image" src="${this.imageSrc}" />
+                        ${this.renderer.canvas}
+                    </pis-image-comparison>
+                `;
+        }
     }
 
     render() {
@@ -234,82 +257,82 @@ class App extends LitElement {
             <div id="menuBar"></div>
 
             <div id="leftSidebar" class="scrollable sidebar">
-                <sp-action-menu>
-                    <sp-icon size="s" slot="icon">${FolderOpenIcon()}</sp-icon>
-                    <!-- <span slot="label">Open</span> -->
-                    <sp-menu>
-                        <sp-menu-item @click="${this.handleOpenImage}">
-                            <sp-icon size="s" slot="icon">${ImageCheckedOutIcon()}</sp-icon>Image
-                        </sp-menu-item>
-                        <sp-menu-item>
-                            <sp-icon size="s" slot="icon">${VideoCheckedOutIcon()}</sp-icon>Video
-                        </sp-menu-item>
-                        <sp-menu-item @click="${this.handleOpenCamera}">
-                            <sp-icon size="s" slot="icon">${MovieCameraIcon()}</sp-icon>Camera
-                        </sp-menu-item>
-                    </sp-menu>
-                </sp-action-menu>
+                <sp-action-group vertical>
+                    <sp-action-button quiet @click="${this.handleOpenImage}">
+                        <sp-icon size="s" slot="icon">${FolderOpenIcon()}</sp-icon>
+                    </sp-action-button>
 
-                <sp-action-button quiet @click="${this.handleSaveClick}">
-                    <sp-icon size="s" slot="icon">${SaveToLightIcon()}</sp-icon>
-                </sp-action-button>
+                    <sp-action-button quiet @click="${this.handleSaveClick}">
+                        <sp-icon size="s" slot="icon">${SaveToLightIcon()}</sp-icon>
+                    </sp-action-button>
+                </sp-action-group>
 
                 <sp-rule size="small"></sp-rule>
+                <sp-action-group vertical>
+                    <sp-action-button
+                        .disabled="${!store.state.history.canUndo}"
+                        quiet
+                        @click="${store.undo}"
+                    >
+                        <sp-icon size="s" slot="icon">${UndoIcon()}</sp-icon>
+                    </sp-action-button>
 
-                <sp-action-button
-                    .disabled="${!store.state.history.canUndo}"
-                    quiet
-                    @click="${store.undo}"
-                >
-                    <sp-icon size="s" slot="icon">${UndoIcon()}</sp-icon>
-                </sp-action-button>
+                    <sp-action-button
+                        .disabled="${!store.state.history.canRedo}"
+                        quiet
+                        @click="${store.redo}"
+                    >
+                        <sp-icon size="s" slot="icon">${RedoIcon()}</sp-icon>
+                    </sp-action-button>
 
-                <sp-action-button
-                    .disabled="${!store.state.history.canRedo}"
-                    quiet
-                    @click="${store.redo}"
-                >
-                    <sp-icon size="s" slot="icon">${RedoIcon()}</sp-icon>
-                </sp-action-button>
+                    <sp-action-button
+                        quiet
+                        toggles
+                        .selected=${this.imageComparison}
+                        @click="${this.toggleImageComparison}"
+                    >
+                        <sp-icon size="s" slot="icon">${MoveLeftRightIcon()}</sp-icon>
+                    </sp-action-button>
+                </sp-action-group>
             </div>
 
-            <div id="main">
-                <pis-image-comparison .enable="${this.imageComparison}">
-                    <img slot="original" src="${this.imageSrc}" />
-                    <canvas slot="modified" id="canvas"></canvas>
-                </pis-image-comparison>
-            </div>
+            <div id="main">${this.renderActiveTool()}</div>
 
             <div id="rightPanel" class="scrollable">
                 <pis-histogram id="histogram"></pis-histogram>
-                ${this.renderEditPanel()} ${this.renderPalette()}
+                ${this.renderPanel()}
             </div>
 
             <div id="rightSidebar" class="sidebar">
-                <sp-action-button
-                    quiet
-                    .selected=${this.currentPanelTab === 'adjust'}
-                    @click="${this.handlePanelTabChange('adjust')}"
-                >
-                    <sp-icon size="s" slot="icon">${PropertiesIcon()}</sp-icon>
-                </sp-action-button>
+                <sp-action-group vertical>
+                    <sp-action-button
+                        quiet
+                        .selected=${this.activeTool === 'adjust'}
+                        @click="${this.handlePanelTabChange('adjust')}"
+                    >
+                        <sp-icon size="s" slot="icon">${PropertiesIcon()}</sp-icon>
+                    </sp-action-button>
 
-                <sp-action-button
-                    quiet
-                    .selected=${this.currentPanelTab === 'palette'}
-                    @click="${this.handlePanelTabChange('palette')}"
-                >
-                    <sp-icon size="s" slot="icon">${ColorPaletteIcon()}</sp-icon>
-                </sp-action-button>
+                    <sp-action-button
+                        quiet
+                        .selected=${this.activeTool === 'crop'}
+                        @click="${this.handlePanelTabChange('crop')}"
+                    >
+                        <sp-icon size="s" slot="icon">${CropRotateIcon()}</sp-icon>
+                    </sp-action-button>
 
-                <sp-action-button
-                    quiet
-                    toggles
-                    .selected=${this.imageComparison}
-                    @click="${this.toggleImageComparison}"
-                >
-                    <sp-icon size="s" slot="icon">${MoveLeftRightIcon()}</sp-icon>
-                </sp-action-button>
+                    <sp-action-button
+                        quiet
+                        .selected=${this.activeTool === 'palette'}
+                        @click="${this.handlePanelTabChange('palette')}"
+                    >
+                        <sp-icon size="s" slot="icon">${ColorPaletteIcon()}</sp-icon>
+                    </sp-action-button>
+
+                    <sp-action-button quiet @click="${this.handleResetChanges}">
+                        <sp-icon size="s" slot="icon">${DeleteIcon()}</sp-icon>
+                    </sp-action-button>
+                </sp-action-group>
             </div>
 
             <sp-icons-medium></sp-icons-medium>

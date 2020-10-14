@@ -4,28 +4,32 @@ varying vec2 texCoord;
 
 uniform sampler2D image;
 uniform float saturation;
-uniform float temperature;
+uniform float temp;
 uniform float tint;
 uniform float hue;
 uniform float vibrance;
 
-const vec3 saturationVector = vec3(0.299, 0.587, 0.114);
-const float PI = 3.1415926535897932384626433832795;
+#pragma glslify: luma = require(../../../utils/shaders/luma.glsl)
+#pragma glslify: map = require(../../../utils/shaders/map.glsl)
+#pragma glslify: logScale = require(../../../utils/shaders/logScale.glsl)
+#pragma glslify: PI = require(../../../utils/shaders/PI.glsl)
+
+const vec3 saturationVector = vec3(0.2126, 0.7152, 0.0722);
 
 void main() {
     vec4 color = texture2D(image, texCoord);
 
-    // Temperature
-    float t = temperature / 4.0;
-    color.r += t;
-    // color.g += t;
-    color.b -= t;
+    // White balance
+    // vec3 tempTint = vec3(+mappedTemp, -mappedTint, -mappedTemp);
+    // color.rgb += tempTint;
 
-    // Tint
-    t = tint / 4.0;
-    // color.r += t;
-    color.g -= t;
-    // color.b += t;
+    float mappedTemp = logScale(temp);
+    float mappedTint = logScale(tint);
+    vec4 tempTint = vec4(1.0 + mappedTemp, 1.0 - mappedTint, 1.0 - mappedTemp, 1.0);
+    tempTint *= 1.0 / luma(tempTint);
+
+    color.rgb *= tempTint.rgb;
+
 
     // Hue - Rotate color cube along {1,1,1} vector (Wolframe alpha: RotationTransform[theta, {1, 1, 1}][{x, y, z}])
     float theta = hue * PI;
@@ -46,7 +50,7 @@ void main() {
     
     
     // Saturation
-    vec3 desaturated = vec3(dot(saturationVector, color.rgb));
+    vec3 desaturated = vec3(luma(color));
     vec3 mixed = mix(desaturated, color.rgb, (saturation + 1.0));
     color = vec4(mixed, color.a);
 

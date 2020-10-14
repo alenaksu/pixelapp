@@ -1,10 +1,19 @@
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+
+const isTS = fs.existsSync(url.pathToFileURL(path.join(process.cwd(), 'tsconfig.json')));
+
+/** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
     mount: {
-        'src': '/static'
+        src: '/static',
+        public: { url: '/', static: true },
     },
-    extends: '@snowpack/app-scripts-lit-element',
     plugins: [
-        './tools/glslPlugin.js',
+        '@snowpack/plugin-babel',
+        '@snowpack/plugin-dotenv',
+        ['./tools/glslPlugin.js', {}],
         './tools/cssImportTextPlugin.js',
         '@snowpack/plugin-optimize',
     ],
@@ -14,9 +23,16 @@ module.exports = {
     installOptions: {
         sourceMap: false,
         treeshake: true,
+        installTypes: isTS,
     },
     buildOptions: {
         baseUrl: '/pixelapp/',
-        clean: true
-    }
+        clean: true,
+    },
+    install: [
+        /* ... */
+    ],
+    alias: {
+        /* ... */
+    },
 };

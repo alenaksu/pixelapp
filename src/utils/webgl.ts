@@ -26,9 +26,9 @@ export function createFramebuffer(
     image: TexImageSource = null,
     options: object = {},
 ) {
-    const texture = createTexture(gl, width, height, image, options);
     const buffer = gl.createFramebuffer();
-    //bind framebuffer to texture
+    
+    const texture = createTexture(gl, width, height, image, options);
     gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
 
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
@@ -99,7 +99,7 @@ export function createTexture(
     if (!image) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, type, null);
     } else {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, type, image);
     }
 
     gl.bindTexture(gl.TEXTURE_2D, null);
@@ -107,27 +107,48 @@ export function createTexture(
     return texture;
 }
 
-export function setUniform(gl: WebGLRenderingContext, type: number, location: WebGLUniformLocation, value: any) {
+export function setUniform(
+    gl: WebGLRenderingContext,
+    type: number,
+    location: WebGLUniformLocation,
+    value: any,
+) {
     switch (type) {
-        case gl.FLOAT: return (Array.isArray(value) ? gl.uniform1fv : gl.uniform1f).call(gl, location, value);
-        case gl.FLOAT_VEC2: return gl.uniform2fv(location, value);
-        case gl.FLOAT_VEC3: return gl.uniform3fv(location, value);
-        case gl.FLOAT_VEC4: return gl.uniform4fv(location, value);
-        case gl.INT: return (Array.isArray(value) ? gl.uniform1iv : gl.uniform1i).call(gl, location, value);
-        case gl.INT_VEC2: return gl.uniform2iv(location, value);
-        case gl.INT_VEC3: return gl.uniform3iv(location, value);
-        case gl.INT_VEC4: return gl.uniform4iv(location, value);
-        case gl.BOOL: return gl.uniform1i(location, value);
-        case gl.BOOL_VEC2: return gl.uniform2iv(location, value);
-        case gl.BOOL_VEC3: return gl.uniform3iv(location, value);
-        case gl.BOOL_VEC4: return gl.uniform4iv(location, value);
-        case gl.FLOAT_MAT2: return gl.uniformMatrix2fv(location, false, value);
-        case gl.FLOAT_MAT3: return gl.uniformMatrix3fv(location, false, value);
-        case gl.FLOAT_MAT4: return gl.uniformMatrix4fv(location, false, value);
-        case gl.SAMPLER_2D || type == gl.SAMPLER_CUBE: return gl.uniform1i(location, value);
+        case gl.FLOAT:
+            return (Array.isArray(value) ? gl.uniform1fv : gl.uniform1f).call(gl, location, value);
+        case gl.FLOAT_VEC2:
+            return gl.uniform2fv(location, value);
+        case gl.FLOAT_VEC3:
+            return gl.uniform3fv(location, value);
+        case gl.FLOAT_VEC4:
+            return gl.uniform4fv(location, value);
+        case gl.INT:
+            return (Array.isArray(value) ? gl.uniform1iv : gl.uniform1i).call(gl, location, value);
+        case gl.INT_VEC2:
+            return gl.uniform2iv(location, value);
+        case gl.INT_VEC3:
+            return gl.uniform3iv(location, value);
+        case gl.INT_VEC4:
+            return gl.uniform4iv(location, value);
+        case gl.BOOL:
+            return gl.uniform1i(location, value);
+        case gl.BOOL_VEC2:
+            return gl.uniform2iv(location, value);
+        case gl.BOOL_VEC3:
+            return gl.uniform3iv(location, value);
+        case gl.BOOL_VEC4:
+            return gl.uniform4iv(location, value);
+        case gl.FLOAT_MAT2:
+            return gl.uniformMatrix2fv(location, false, value);
+        case gl.FLOAT_MAT3:
+            return gl.uniformMatrix3fv(location, false, value);
+        case gl.FLOAT_MAT4:
+            return gl.uniformMatrix4fv(location, false, value);
+        case gl.SAMPLER_2D || type == gl.SAMPLER_CUBE:
+            return gl.uniform1i(location, value);
         default:
             throw 'unknown type: 0x' + type.toString(16);
-}
+    }
 }
 
 export function setUniforms(gl: WebGLRenderingContext, uniforms: object) {
@@ -155,4 +176,14 @@ export function enableExtensions(gl: WebGLRenderingContext, extensions: string[]
             throw new Error(`Extension not available: ${name}`);
         }
     }
+}
+
+export function bindTexture(
+    gl: WebGLRenderingContext,
+    texture: WebGLTexture,
+    position: number = gl.TEXTURE0,
+) {
+    gl.activeTexture(position);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.activeTexture(gl.TEXTURE0);
 }

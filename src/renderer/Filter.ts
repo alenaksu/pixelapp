@@ -18,6 +18,7 @@ export default class Filter {
         
             void main() {
                 texCoord = (position + 1.0) / 2.0;
+
                 gl_Position = vec4(position, 0, 1.0);
             }
         `;
@@ -52,24 +53,9 @@ export default class Filter {
     }
 
     setupUniforms() {
-        const { gl, program, parameters } = this;
+        const { gl, parameters } = this;
 
-        const allUniforms = {
-            ...parameters,
-            resolution: [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight]
-        };
-
-        setUniforms(gl, allUniforms);
-        setAttribArray(gl, 'position', 2);
-
-        // const passLocation = gl.getUniformLocation(program, 'pass');
-        // gl.uniform1f(passLocation, i);
-
-        const imageLocation = gl.getUniformLocation(program, 'image');
-        gl.uniform1i(imageLocation, 0);
-
-        const sourceLocation = gl.getUniformLocation(program, 'source');
-        gl.uniform1i(sourceLocation, 1);
+        setUniforms(gl, parameters);
     }
 
     use() {

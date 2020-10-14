@@ -14,7 +14,7 @@ export class ImageComparison extends LitElement {
     enable: boolean = false;
 
     handleDrag = (e: MouseEvent) => {
-        const position = Math.max(Math.min(e.offsetX / this.offsetWidth, 0.95), 0.05) * 100;
+        const position = Math.min(1, Math.max(0, (e.clientX - this.offsetLeft) / this.offsetWidth)) * 100;
         this.style.setProperty(
             '--split-point',
             `${position}%`,
@@ -22,13 +22,15 @@ export class ImageComparison extends LitElement {
     };
 
     handleDragEnd = () => {
-        this.removeEventListener('mousemove', this.handleDrag);
+        this.removeEventListener('pointermove', this.handleDrag);
     };
 
-    handleDragStart(e) {
+    handleDragStart(e: PointerEvent) {
         e.preventDefault();
-        this.addEventListener('mousemove', this.handleDrag, { passive: true });
-        document.documentElement.addEventListener('mouseup', this.handleDragEnd, { once: true });
+        e.stopPropagation();
+
+        this.addEventListener('pointermove', this.handleDrag);
+        document.documentElement.addEventListener('pointerup', this.handleDragEnd, { once: true });
     }
 
     render() {
@@ -41,7 +43,7 @@ export class ImageComparison extends LitElement {
                       <div class="image original">
                           <slot name="original"></slot>
                       </div>
-                      <div class="separator" @mousedown="${this.handleDragStart}">
+                      <div class="separator" @pointerdown="${this.handleDragStart}">
                           <div class="thumb">
                               <sp-icon>${ChevronLeftIcon()}</sp-icon>
                               <sp-icon>${ChevronRightIcon()}</sp-icon>
