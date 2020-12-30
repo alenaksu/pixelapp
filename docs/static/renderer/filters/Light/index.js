@@ -1,0 +1,1 @@
+import r from"../../Filter.js";import e from"./shader.js";export default class s extends r{constructor(...t){super(...t);this.name="light",this.parameters={exposure:0,contrast:0,highlights:0,shadows:0,whites:0,blacks:0}}static get fragmentShader(){return e}}

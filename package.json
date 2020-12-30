@@ -6,7 +6,8 @@
         "test": "echo \"This template does not include a test runner by default.\" && exit 1",
         "format": "prettier --write 'src/**/*.[j|t]s'",
         "lint": "prettier --check 'src/**/*.[j|t]s'",
-        "build": "snowpack build"
+        "build": "snowpack build",
+        "postinstall": "node tools/patchSpectrum.js"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.12.7",
@@ -29,7 +30,7 @@
     },
     "dependencies": {
         "@babel/plugin-proposal-class-properties": "^7.12.1",
-        "@babel/plugin-proposal-decorators": "^7.12.1",
+        "@babel/plugin-proposal-decorators": "^7.12.12",
         "@spectrum-web-components/bundle": "^0.15.8",
         "@spectrum-web-components/styles": "^0.6.1",
         "@spectrum-web-components/themes": "^0.2.3",

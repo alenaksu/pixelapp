@@ -15,7 +15,12 @@ module.exports = {
         '@snowpack/plugin-dotenv',
         ['./tools/glslPlugin.js', {}],
         './tools/cssImportTextPlugin.js',
-        '@snowpack/plugin-optimize',
+        [
+            '@snowpack/plugin-optimize',
+            {
+                target: 'es6',
+            },
+        ],
     ],
     devOptions: {
         out: './docs',

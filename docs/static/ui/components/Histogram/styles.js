@@ -1,0 +1,20 @@
+export default`:host {
+    display: flex;
+    position: relative;
+}
+
+#options {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: opacity 0.2s;
+    opacity: 0.3;
+}
+
+#options:hover {
+    opacity: 1.0;
+}
+
+canvas {
+    flex: 1;
+}`;
