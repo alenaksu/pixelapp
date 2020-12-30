@@ -12,11 +12,10 @@ uniform float shadows;
 uniform float whites;
 uniform float blacks;
 
-const float PI = 3.1415926535897932384626433832795;
-
-float luma(vec4 color) {
-    return dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
-}
+#pragma glslify: luma = require(../../../utils/shaders/luma.glsl)
+#pragma glslify: PI = require(../../../utils/shaders/PI.glsl)
+#pragma glslify: map = require(../../../utils/shaders/map.glsl)
+#pragma glslify: logScale = require(../../../utils/shaders/logScale.glsl)
 
 vec4 blur() {
     vec2 off = resolution;
@@ -67,11 +66,17 @@ vec4 blur() {
     return blurred;
 }
 
+// https://dinodini.wordpress.com/2010/04/05/normalized-tunable-sigmoid-functions/
+float nts(float x, float k) {
+    x-= 0.5;
+    return (x - x * k) / (k - abs(x) * 4.0 * k + 1.0) + 0.5;
+}
+
 void main() {
     vec4 color = texture2D(image, texCoord);
 
     // Exposure
-    color.rgb *= vec3(pow(2.0, exposure));
+    color.rgb *= pow(2.0, exposure);
 
     // Contrast
     float slant = tan((contrast / 2.0 + 1.0) * (PI / 4.0));
@@ -82,13 +87,11 @@ void main() {
 
     // Highlights / Shadows
     float luminance = luma(color);
+    float k = -0.8;
+    float l = nts(luminance, k);
 
-    float slope = 0.1;
-    float t = luminance - 0.5;
-    float k = -slope - 0.5;
-    float l = ((k * t) / (k - abs(t) + 0.5)) + 0.5;
-    float s = (1.0 - l) * (shadows + 1.0);
     float h = l * (highlights + 1.0);
+    float s = (1.0 - l) * (shadows + 1.0);
 
     color.rgb = s * color.rgb + h * color.rgb;
     

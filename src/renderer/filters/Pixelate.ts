@@ -18,9 +18,9 @@ export default class Pixelate extends Filter {
             uniform float pixelSize;
 
             void main() {
-                vec2 tileSize = vec2(pixelSize);
-                vec2 tile = floor(gl_FragCoord.xy / tileSize) * tileSize;
-                vec2 coord = (tile + (tileSize / 2.0)) * resolution;
+                vec2 tileSize = vec2(pixelSize) * resolution;
+                vec2 tile = floor(texCoord / tileSize) * tileSize;
+                vec2 coord = (tile + (tileSize / 2.0));
                 vec4 color = texture2D(image, coord);
 
                 gl_FragColor = color;

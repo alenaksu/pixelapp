@@ -5,7 +5,7 @@ export default class Color extends Filter {
     name: string = 'color';
 
     parameters = {
-        temperature: 0,
+        temp: 0,
         tint: 0,
         hue: 0,
         vibrance: 0,

@@ -33,7 +33,7 @@ export type PluginHandler = (store: StoreInterface) => void;
 export type StoreConfig<S> = {
     actions?: { [name: string]: ActionHandler };
     mutations?: { [name: string]: MutationHandler };
-    initialState?: S;
+    state?: S;
     plugins?: Array<PluginHandler>;
     events?: { [name: string]: Array<string> };
 };

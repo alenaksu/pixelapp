@@ -1,0 +1,5 @@
+{
+    "glsllint.glslifyOptions": {
+        "basedir": "src/"
+    }
+}

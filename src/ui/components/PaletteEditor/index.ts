@@ -1,5 +1,12 @@
 import { LitElement, html, property, unsafeCSS } from 'lit-element';
-import { rgbToHex, openFile, loadImage, iteratePixels, hexToRgb } from '../../../utils';
+import {
+    rgbToHex,
+    openFile,
+    loadImage,
+    iteratePixels,
+    hexToRgb,
+    getImageData,
+} from '../../../utils';
 import processing from '../../../processing';
 import { AddIcon } from '@spectrum-web-components/icons-workflow';
 import styles from './styles.css';
@@ -22,6 +29,7 @@ class PaletteEditor extends LitElement {
     importPalette() {
         openFile()
             .then((file) => loadImage(URL.createObjectURL(file)))
+            .then((image) => getImageData(image))
             .then((palette: ImageData) => {
                 this.palette = [...iteratePixels(palette)].map(([color]) => color);
                 this.fireChangeEvent();
@@ -87,9 +95,7 @@ class PaletteEditor extends LitElement {
     render() {
         const { palette } = this;
         return html`
-            <div class="swatch">
-                ${palette && this.renderColors()}
-            </div>
+            <div class="swatch">${palette && this.renderColors()}</div>
             <sp-action-button quiet id="addButton" @click="${this.handleAddColorClick}">
                 <sp-icon slot="icon">${AddIcon()}</sp-icon>
             </sp-action-button>

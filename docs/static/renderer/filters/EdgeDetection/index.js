@@ -1,1 +1,0 @@
-import t from"./shader.js";import r from"../../Filter.js";export default class s extends r{constructor(...e){super(...e);this.name="edgeDetection",this.parameters={radius:1,threshold:.3,blend:0}}static get fragmentShader(){return t}}

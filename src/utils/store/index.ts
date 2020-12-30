@@ -1,4 +1,4 @@
-import { createEventEmitter } from '../events';
+import { createEventEmitter, EventEmitter } from '../events';
 import {
     Action,
     StoreConfig,
@@ -42,7 +42,7 @@ export class Store<S = any> implements StoreInterface {
         objToMap(config.actions, this.actions);
         objToMap(config.events, this.events);
 
-        this.state = Object.freeze(clone(config.initialState));
+        this.state = config.state;
 
         if (config.plugins) config.plugins!.forEach((plugin) => plugin(this));
     }
@@ -51,6 +51,7 @@ export class Store<S = any> implements StoreInterface {
         if (this.eventsPending) return;
 
         this.eventsPending = true;
+        // TODO maybe deprecate
         queueMicrotask(() => {
             this.emitter.emit(UPDATE_EVENT, mutation);
             this.events.forEach((events, names) => {
@@ -64,12 +65,12 @@ export class Store<S = any> implements StoreInterface {
 
     on = this.emitter.on;
     off = this.emitter.off;
+    emit = this.emitter.emit;
 
     dispatch = normalizeEvent((action: Action) => {
         const actions = this.actions;
 
-        if (actions.has(action.type))
-            actions.get(action.type)!(this, action.data);
+        if (actions.has(action.type)) actions.get(action.type)!(this, action.data);
     });
 
     commit = normalizeEvent((mutation: Mutation) => {
@@ -85,12 +86,12 @@ export class Store<S = any> implements StoreInterface {
 }
 
 export function createStore<S>(store: StoreConfig<S>): Store<S> & any {
-    return new Proxy(new Store(store), {
+    return new Proxy<Store & EventEmitter>(<any>new Store(store), {
         get(target, name, receiver) {
-            if (target.actions.has(<string>name)) 
+            if (target.actions.has(<string>name))
                 return target.actions.get(<string>name).bind(null, target);
 
             return Reflect.get(target, name, receiver);
-        }
-    })
+        },
+    });
 }

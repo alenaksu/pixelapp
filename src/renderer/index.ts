@@ -1,15 +1,23 @@
-import rafThrottle, { createTexture, createFramebuffer, createPlane } from '../utils';
+import {
+    createTexture,
+    createFramebuffer,
+    createPlane,
+    setUniforms,
+    setAttribArray,
+    bindTexture,
+} from '../utils';
 
 import Filter from './Filter';
 import Light from './filters/Light';
 import Color from './filters/Color';
-import FlipY from './filters/FlipY';
+import Crop from './filters/Crop';
 import EdgeDetection from './filters/EdgeDetection';
 import UnsharpMask from './filters/UnsharpMask';
 import Pixelate from './filters/Pixelate';
 import Palette from './filters/Palette';
 import Dither from './filters/Dither';
 import Blur from './filters/Blur';
+import FlipY from './filters/FlipY';
 
 type FiltersArray = Array<Filter> & {
     [name: string]: any;
@@ -20,13 +28,14 @@ export class Renderer {
     source?: TexImageSource;
     gl: WebGLRenderingContext;
     filters: FiltersArray = <FiltersArray>[];
-    debug: boolean = true;
+    debug: boolean = false;
     frameBuffers: [any, any];
 
-    constructor(public canvas: HTMLCanvasElement) {
+    constructor(public canvas: HTMLCanvasElement = document.createElement('canvas')) {
         const gl: WebGLRenderingContext = canvas.getContext('webgl', {
             antialias: false,
             preserveDrawingBuffer: true,
+            depth: false,
         });
 
         if (!gl) throw new Error('WebGL is not available');
@@ -48,9 +57,12 @@ export class Renderer {
         const gl = this.gl;
 
         gl.viewport(0, 0, width, height);
-        // Clear the canvas
-        gl.clearColor(0, 1.0, 0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        // Clear the buffers
+        for (const frameBuffer of this.frameBuffers) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.buffer);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
 
         gl.disable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);
@@ -69,15 +81,12 @@ export class Renderer {
         // draw the original image first
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
 
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-
-        gl.activeTexture(gl.TEXTURE0);
+        bindTexture(gl, texture, gl.TEXTURE1);
     }
 
-    draw = rafThrottle(() => {
+    draw = () => {
         console.time('renderer::draw');
-        
+
         const { gl, source, filters, debug, frameBuffers } = this;
 
         if (!source) return;
@@ -99,8 +108,14 @@ export class Renderer {
                 // "Activate" the filter
                 filter.use();
 
-                const passLocation = gl.getUniformLocation(filter.program, 'pass');
-                gl.uniform1f(passLocation, i);
+                // Setup uniforms
+                setUniforms(gl, {
+                    resolution: [1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight],
+                    image: 0,
+                    source: 1,
+                    pass: i,
+                });
+                setAttribArray(gl, 'position', 2);
 
                 // Draw to fbo
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -131,7 +146,7 @@ export class Renderer {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
         console.timeEnd('renderer::draw');
-    });
+    };
 
     setSource(newSource: TexImageSource) {
         const { gl, canvas, frameBuffers } = this;
@@ -157,20 +172,18 @@ export class Renderer {
     }
 }
 
-export function createEditor(canvas) {
-    const renderer = new Renderer(canvas);
-
-    renderer.registerFilter(Filter);
-    // renderer.registerFilter(Posterize);
+export function createEditor() {
+    const renderer = new Renderer();
+    renderer.registerFilter(Crop);
     renderer.registerFilter(Light);
     renderer.registerFilter(Color);
-    // Detail?
     renderer.registerFilter(Blur);
     renderer.registerFilter(UnsharpMask);
     renderer.registerFilter(EdgeDetection);
     renderer.registerFilter(Pixelate);
     renderer.registerFilter(Dither);
     renderer.registerFilter(Palette);
+    // renderer.registerFilter(Posterize);
     renderer.registerFilter(FlipY);
 
     return renderer;

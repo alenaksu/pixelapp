@@ -2,6 +2,8 @@ import { RGBAColor, MimeTypes } from '../types';
 
 export * from './events';
 export * from './webgl';
+export * from './math';
+export * from './template';
 
 export function getPixel(
     x: number,
@@ -57,33 +59,28 @@ export function luma(color) {
     return color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.0722;
 }
 
-export function loadImage(imageSrc: string, maxSize: number = 2048) {
-    return new Promise((resolve) => {
-        const image = new Image();
-        image.onload = () => {
-            const ratio = Math.min(
-                maxSize / (image.width > image.height ? image.width : image.height),
-                1,
-            );
+export function loadImage(imageSrc: string, maxSize: number = Infinity) {
+    const image = new Image();
+    image.src = imageSrc;
 
-            const imageData = getImageData(image, image.width * ratio, image.height * ratio);
+    return image.decode().then(() => {
+        const ratio = Math.min(maxSize / Math.max(image.width, image.height), 1);
 
-            resolve(imageData);
-        };
-        image.src = imageSrc;
+        return getImageData(image, image.width * ratio, image.height * ratio);
     });
 }
 
 export function getImageData(image: HTMLImageElement, width = image.width, height = image.height) {
     const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext('2d');
+
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    return imageData;
+    return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 export function rgbToHsl(r, g, b) {
@@ -186,24 +183,33 @@ export function getFromPath(obj: object, path: string | Array<string>, defaultVa
     return obj;
 }
 
-export default function rafThrottle(fn: Function) {
+export function rafThrottle(fn: Function) {
     let rafRequest;
     let lastArgs;
+
+    // TODO Wait for layout to be completed
+    // const channel = new MessageChannel();
+    // channel.port2.onmessage = () => rafRequest = null;
+
     return (...args) => {
         lastArgs = args;
 
         if (rafRequest) return;
+
         rafRequest = requestAnimationFrame(() => {
-            fn(...lastArgs);
             rafRequest = null;
+            // channel.port1.postMessage(null);
+            fn(...lastArgs);
         });
     };
 }
 
 export function throttle(fn: Function, delay: number = 1000) {
     let timeoutRequest;
+
     return (...args) => {
         if (timeoutRequest) return;
+
         timeoutRequest = setTimeout(() => {
             timeoutRequest = null;
             fn(...args);
@@ -211,8 +217,21 @@ export function throttle(fn: Function, delay: number = 1000) {
     };
 }
 
-export function saveCanvas(canvas: HTMLCanvasElement, { name = 'image.jpg', quality = 80 } = {}) {
-    return new Promise((resolve) => {
+export function debounce(fn: Function, delay: number = 500) {
+    let timeoutRequest;
+
+    return (...args) => {
+        if (timeoutRequest) clearTimeout(timeoutRequest);
+
+        timeoutRequest = setTimeout(() => {
+            timeoutRequest = null;
+            fn(...args);
+        }, delay);
+    };
+}
+
+export function saveImage(canvas: HTMLCanvasElement, { name = 'image.jpg', quality = 80 } = {}) {
+    return new Promise<void>((resolve) => {
         canvas.toBlob(
             (blob) => {
                 const a = document.createElement('a');

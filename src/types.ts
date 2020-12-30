@@ -5,3 +5,5 @@ export enum MimeTypes {
     Video = 'video/mp4, video/ogg',
     Image = 'image/jpeg, image/png',
 }
+
+export type Point = [number, number];

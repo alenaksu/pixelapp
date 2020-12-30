@@ -9,7 +9,7 @@ module.exports = function (snowpackConfig, options = {}) {
             output: ['.js'],
         },
         async load({ filePath }) {
-            return `export default ${JSON.stringify(glsl.file(filePath))};`;
+            return `export default ${JSON.stringify(glsl.file(filePath, options))};`;
         },
     };
 };

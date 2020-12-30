@@ -3,7 +3,7 @@ export type EventHandler<T = any> = (event: T) => void;
 export interface EventEmitter {
     on(type: string, handler: EventHandler): void;
     off(type: string, handler: EventHandler): void;
-    emit(type: string, event: any): void;
+    emit(type: string, event?: any): void;
 }
 
 export function createEventEmitter<T>(
@@ -22,7 +22,7 @@ export function createEventEmitter<T>(
             }
         },
 
-        emit(name: string, event: T) {
+        emit(name: string, event?: T) {
             if (events.has(name)) {
                 events.get(name).forEach((handler) => handler(event));
             }

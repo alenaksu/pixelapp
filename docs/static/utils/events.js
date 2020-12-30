@@ -1,1 +1,0 @@
-export function createEventEmitter(i=new Map){return{on(f,r){i.has(f)||i.set(f,[]),i.get(f).push(r)},off(f,r){if(i.has(f)){const t=i.get(f);t.splice(t.indexOf(r),1)}},emit(f,r){i.has(f)&&i.get(f).forEach(t=>t(r))}}}
