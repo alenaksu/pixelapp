@@ -1,6 +1,7 @@
 export default`:host {
     display: flex;
     position: relative;
+    padding: 10%;
     /* animation: 290ms ease-in forwards padding-animation;    */
 
     --corner-size: 24px;
