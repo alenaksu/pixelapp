@@ -15,19 +15,19 @@ module.exports = {
         '@snowpack/plugin-dotenv',
         ['./tools/glslPlugin.js', {}],
         './tools/cssImportTextPlugin.js',
-        [
-            '@snowpack/plugin-optimize',
-            {
-                target: 'es6',
-            },
-        ],
+        // [
+        //     '@snowpack/plugin-optimize',
+        //     {
+        //         target: 'es2018',
+        //     },
+        // ],
     ],
     devOptions: {
         out: './docs',
     },
     installOptions: {
         sourceMap: false,
-        treeshake: true,
+        treeshake: false,
         installTypes: isTS,
     },
     buildOptions: {
@@ -39,5 +39,14 @@ module.exports = {
     ],
     alias: {
         /* ... */
+    },
+    experiments: {
+        optimize: {
+            bundle: false,
+            minify: true,
+            manifest: true,
+            preload: true,
+            target: 'es2018',
+        },
     },
 };
