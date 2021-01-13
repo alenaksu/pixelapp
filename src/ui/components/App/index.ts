@@ -136,13 +136,15 @@ class App extends LitElement {
 
     loadPreview() {
         this.loading = true;
-        loadImage(this.imageSrc, 1980).then((image: ImageData) => {
-            store.setImageData(image);
-            this.renderer.setSource(image);
-            this.histogram.draw(this.renderer.canvas);
-            // this.palettePanel.editor.image = image;
-            this.loading = false;
-        });
+        loadImage(this.imageSrc, Math.max(window.screen.width, window.screen.height)).then(
+            (image: ImageData) => {
+                store.setImageData(image);
+                this.renderer.setSource(image);
+                this.histogram.draw(this.renderer.canvas);
+                // this.palettePanel.editor.image = image;
+                this.loading = false;
+            },
+        );
     }
 
     toggleImageComparison() {
