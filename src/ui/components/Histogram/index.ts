@@ -11,7 +11,7 @@ import {
     setAttribArray,
     enableExtensions,
     bindTexture,
-    debounce,
+    debounce
 } from '../../../utils';
 import { LineIcon, LightIcon } from '@spectrum-web-components/icons-workflow';
 
@@ -118,7 +118,7 @@ class Histogram extends LitElement {
         gl.blendFunc(gl.ONE, gl.ONE);
 
         // Upload the image
-        gl.bindTexture(gl.TEXTURE_2D, imageTexture);
+        bindTexture(gl, imageTexture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
         gl.useProgram(infoProgram);
@@ -159,10 +159,11 @@ class Histogram extends LitElement {
             binsCount,
         });
 
-        setAttribArray(gl, 'position', 2);
         gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer);
         gl.bindFramebuffer(gl.FRAMEBUFFER, maxValueBuffer.buffer);
-        gl.bindTexture(gl.TEXTURE_2D, binsBuffer.texture);
+        bindTexture(gl, binsBuffer.texture);
+
+        setAttribArray(gl, 'position', 2);
 
         gl.viewport(0, 0, 1, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);

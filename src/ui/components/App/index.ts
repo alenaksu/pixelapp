@@ -1,8 +1,5 @@
 import { LitElement, html, unsafeCSS, query, property } from 'lit-element';
 import {
-    ImageCheckedOutIcon,
-    MovieCameraIcon,
-    VideoCheckedOutIcon,
     UndoIcon,
     MoveLeftRightIcon,
     FolderOpenIcon,
@@ -16,7 +13,6 @@ import {
 import styles from './styles.css';
 import { createEditor, Renderer } from '../../../renderer';
 import { rafThrottle, loadImage, openFile, saveImage } from '../../../utils';
-import { MimeTypes } from '../../../types';
 import store from '../../../store';
 
 import '../panels/PalettePanel';
@@ -136,7 +132,7 @@ class App extends LitElement {
 
     loadPreview() {
         this.loading = true;
-        loadImage(this.imageSrc, Math.max(window.screen.width, window.screen.height)).then(
+        loadImage(this.imageSrc, Math.min(window.screen.width, window.screen.height)).then(
             (image: ImageData) => {
                 store.setImageData(image);
                 this.renderer.setSource(image);

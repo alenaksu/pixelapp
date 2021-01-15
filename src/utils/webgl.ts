@@ -27,7 +27,7 @@ export function createFramebuffer(
     options: object = {},
 ) {
     const buffer = gl.createFramebuffer();
-    
+
     const texture = createTexture(gl, width, height, image, options);
     gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
 
@@ -186,4 +186,12 @@ export function bindTexture(
     gl.activeTexture(position);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.activeTexture(gl.TEXTURE0);
+}
+
+export function readPixels(gl: WebGLRenderingContext) {
+    const [_left, _top, width, height] = gl.getParameter(gl.VIEWPORT);
+    const data = new Float32Array(width * height * 4);
+    gl.readPixels(0, 0, width, height, gl.RGBA, gl.FLOAT, data);
+
+    return data;
 }

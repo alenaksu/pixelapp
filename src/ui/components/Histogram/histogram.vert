@@ -11,7 +11,7 @@ uniform int binsCount;
 
 vec2 indexToCoord(float index, vec2 resolution) {
     vec2 pixelCoord = vec2(
-        mod(index, resolution.x), 
+        mod(index, resolution.x),
         floor(index / resolution.x)
     );
     return (pixelCoord + 0.5) / resolution;

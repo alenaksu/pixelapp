@@ -25,7 +25,7 @@ module.exports = {
     devOptions: {
         out: './docs',
     },
-    installOptions: {
+    packageOptions: {
         sourceMap: false,
         treeshake: false,
         installTypes: isTS,
@@ -34,19 +34,11 @@ module.exports = {
         baseUrl: '/pixelapp/',
         clean: true,
     },
-    install: [
-        /* ... */
-    ],
-    alias: {
-        /* ... */
-    },
-    experiments: {
-        optimize: {
-            bundle: false,
-            minify: true,
-            manifest: true,
-            preload: true,
-            target: 'es2018',
-        },
+    optimize: {
+        bundle: false,
+        minify: true,
+        manifest: true,
+        preload: true,
+        target: 'es2018',
     },
 };
