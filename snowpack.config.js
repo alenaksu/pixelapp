@@ -33,6 +33,7 @@ module.exports = {
     buildOptions: {
         baseUrl: '/pixelapp/',
         clean: true,
+        out: './docs'
     },
     optimize: {
         bundle: false,
