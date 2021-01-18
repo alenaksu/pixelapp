@@ -17,7 +17,7 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 vec2 indexToCoord(float index, vec2 resolution) {
     vec2 pixelCoord = vec2(
-        mod(index, resolution.x), 
+        mod(index, resolution.x),
         floor(index / resolution.x)
     );
     return (pixelCoord + 0.5) / resolution;
@@ -38,4 +38,5 @@ void main() {
     // binIndex = floor(binIndex * float(binsCount) + 0.5) / float(binsCount);
     gl_Position = vec4(binIndex * 2.0 - 1.0, 0.5, 0.0, 1.0);
     gl_PointSize = 1.0;
-}`;
+}
+`;

@@ -1,7 +1,5 @@
-export default`#ifdef GL_ES
-precision mediump float;
+export default`precision mediump float;
 #define GLSLIFY 1
-#endif
 
 uniform vec2 resolution;
 uniform sampler2D histogramInfo;
@@ -37,9 +35,9 @@ float lineSegment(vec2 p, vec2 a, vec2 b) {
 
     // Orthogonal intersection
     float h = clamp(
-        dot(pa, m) / dot(m, m), 
-        0.0, 
-        1.0 
+        dot(pa, m) / dot(m, m),
+        0.0,
+        1.0
     );
 
     // Distance
@@ -62,7 +60,7 @@ float draw(vec2 p, vec2 a, vec2 b) {
 }
 
 vec4 normalizeValue(vec4 value, vec4 m) {
-    return logarithmicScale 
+    return logarithmicScale
         ? log(value) / log(m)
         : value / m;
 }
@@ -91,4 +89,5 @@ void main() {
     );
 
     gl_FragColor = color;
-}`;
+}
+`;

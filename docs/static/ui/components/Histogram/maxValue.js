@@ -1,4 +1,4 @@
-export default`precision highp float;
+export default`precision mediump float;
 #define GLSLIFY 1
 
 uniform sampler2D image;
@@ -20,4 +20,5 @@ void main() {
     gl_FragColor = vec4(
         max(maxValue.r, max(maxValue.g, maxValue.b))
     );
-}`;
+}
+`;
