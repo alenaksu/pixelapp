@@ -6,7 +6,7 @@
         "test": "echo \"This template does not include a test runner by default.\" && exit 1",
         "format": "prettier --write 'src/**/*.[j|t]s'",
         "lint": "prettier --check 'src/**/*.[j|t]s'",
-        "build": "snowpack build",
+        "build": "snowpack build && touch docs/.nojekyll",
         "postinstall": "node tools/patchSpectrum.js"
     },
     "devDependencies": {
